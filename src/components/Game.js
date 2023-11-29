@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { Stack, Button, Typography, Box, Divider, Paper } from '@mui/material';
+//import Split from 'react-split'
+import Split from '@uiw/react-split'
+import SplitPane, { Pane } from 'split-pane-react';
 import Character from './Character';
 
 export default function Game() {
@@ -51,8 +54,8 @@ export default function Game() {
 
     function ResourcesTab() {
         return (
-            <Stack direction="column" sx={{ height: '100%', width: '25%', backgroundColor: 'lightgray', flexDirection: 'column' }}>
-                <Stack sx={{ m: 5, backgroundColor: 'lightgray' }}>
+            <Stack direction="column" sx={{ height: '100%', width: '100%', backgroundColor: 'azure', flexDirection: 'column' }}>
+                <Stack sx={{ m: 5, backgroundColor: 'azure' }}>
                     <Typography>
                         Resources
                     </Typography>
@@ -72,7 +75,7 @@ export default function Game() {
 
     function Actions() {
         return (
-            <Stack direction="row" sx={{ height: '100%', width: '100%', backgroundColor: 'orange' }}>
+            <Stack direction="row" sx={{ backgroundColor: 'orange' }}>
 
                 <Stack direction="column">
                     <Typography>
@@ -96,7 +99,8 @@ export default function Game() {
 
     function DisplayLog() {
         return (
-            <Stack sx={{ height: '100%', width: '100%', backgroundColor: '', border: 'solid', borderColor: 'black' }} >
+
+            <Stack >
                 <Typography >
                     Action Log
                 </Typography>
@@ -115,20 +119,25 @@ export default function Game() {
     }
 
     return (
-        <Stack direction="row" sx={{ m: 'auto', height: '80vh', width: '100%', backgroundColor: 'gray', display: 'flex', alignContent: 'start' }}>
-            <ResourcesTab />
-            <Stack direction="column" sx={{ height: '100%', width: '100%', backgroundColor: 'gray', justifyContent: 'space-between' }}>
-                <Stack sx={{ width: '95%', height: '100%', ml: 'auto', mr: 'auto', mt: 5 }} >
-                    <Typography variant="h5">
-                        {curCharacter.name}
-                    </Typography>
-                    <MainDisplay />
-                </Stack>
-                <Paper square={false} elevation={24} sx={{ maxHeight: 300, minHeight: 100, overflow: 'auto', width: '95%', ml: 'auto', mr: 'auto', mt: 5 }}>
-                    <DisplayLog />
-                </Paper>
-            </Stack>
-        </Stack>
-    )
+        <Split style={{ height: "80vh", border: '1px solid #d5d5d5', borderRadius: 3}}>
+
+            <div style={{ flex: 1}}>
+                <ResourcesTab />
+            </div>
+            <Split mode="vertical" style={{width:'70%'}}>
+                <div style={{ height: '80%' }}>
+                    <Actions />
+                </div>
+                <Split style={{ height: '20%'  }}>
+                    <div style={{ flex: 1 }}>
+                        <DisplayLog/>
+                    </div>
+                </Split>
+            </Split>
+            <div style={{ flex: 1 }}>Build Menu</div>
+
+
+        </Split>
+    );
 
 }

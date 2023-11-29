@@ -1,5 +1,6 @@
 import Entity from './Entity';
 import { keyExists } from '../Helpers/JSONHelpers';
+import { getAvailableActions } from '../Data/ActionList';
 
 export default class Character {
 
@@ -7,7 +8,7 @@ export default class Character {
         this._name = "New Character"
         //this.HP = 10
         //this.maxHP = 10
-        //this.lvl = 1
+        this._lvl = 1
         //this.curXP = 0
         //this.ATK = 1
         //this.DEF = 1
@@ -31,7 +32,6 @@ export default class Character {
     }
 
     get name() {
-        console.log("This: ", this)
         return this._name
     }
 
@@ -39,15 +39,18 @@ export default class Character {
         this._name = newName
     }
 
-    getActions() {
-         let possibleActions = []
-         return possibleActions
-
+    get lvl() {
+        return this._lvl
     }
+
+    getActions() {
+        let possibleActions = getAvailableActions(this)
+        return possibleActions
+    }
+
 
     //TODO: EQUIPMENT
     //TODO BUFFS
     //TODO: COMBAT
-    //
     
 }
