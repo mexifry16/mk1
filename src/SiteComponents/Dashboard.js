@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Stack, Button, Typography, Box, Avatar, List, ListItem, ListItemText, ListItemAvatar, IconButton, Divider } from '@mui/material';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DeleteIcon from '@mui/icons-material/Delete';
-import TODO from './views/ToDo'
+import TODO from './ToDo'
 
 export default function Dashboard() {
 

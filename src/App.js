@@ -1,8 +1,8 @@
 import { Routes, Route, Outlet, Link } from "react-router-dom";
 import { Stack, Button, Typography, Box, Divider } from '@mui/material';
-import About from './components/About';
+import About from './SiteComponents/About';
 import Game from './components/Game';
-import Dashboard from './components/Dashboard'
+import Dashboard from './SiteComponents/Dashboard'
 import logo from './logo.svg';
 import './App.css';
 

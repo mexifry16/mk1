@@ -1,43 +1,44 @@
 import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { Stack, Button, Typography, Box, Divider, Paper } from '@mui/material';
-//import Split from 'react-split'
+import { Stack, Button, Typography, Box, Divider, Paper, Tooltip } from '@mui/material';
 import Split from '@uiw/react-split'
 import SplitPane, { Pane } from 'split-pane-react';
-import Character from './Character';
+import ShopSidebar from './Views/ShopSidebar'
+import Character from './Models/Character';
+import { getAreaActions } from '../Data/ActionList'
 
 export default function Game() {
 
+    //Character data
     const [curCharacter, setCurCharacter] = useState(new Character({ "name": "Billy Wigglestick" }))
     const [availbleActions, setAvailableActions] = useState([])
+
+    //Player resources
     const [coins, setCoins] = useState(0)
-    const [wood, setWood] = useState(0)
+    const [maxCoins, setMaxCoins] = useState(10)
+    const [wood, setWood] = useState(0) 
+    const [maxWood, setMaxWood] = useState(10)
+    const [resources, setResource] = useState({})
+
+    //Game State data
+    const [curLocation, setCurLocation] = useState("Village")
+    const [curShop, setCurShop] = useState(null)
+    const [actionLog, setActionLog] = useState([])
+    
+
+    //UX State data
     const [currentView, setCurrentView] = useState(0)
-    const [actionLog, setActionLog] = useState(["test test test", "Hello world", "I've got a lovely bunch of coconuts"])
+    const [curSidebarView, setCurSidebarView] = useState(0) 
 
-    //useEffect(() => {
+    useEffect(() => {
+        setAvailableActions(getAreaActions(curLocation, curCharacter, {"coins":coins, "wood":wood}))
+    }, [curCharacter])
 
-    //}, [])
-
-    function addActionLog(message) {
-        let newLog = [...actionLog]
-        newLog.unshift(message)
-        setActionLog(newLog)
-    }
-
-    const AvailableActions = [
-
-    ]
-
+    /**
+     * View Processing
+     */
     function setView(newView) {
         setCurrentView(newView)
-    }
-
-
-    function incrementCoins() {
-        let prevCoins = coins
-        let newCoins = prevCoins + 1
-        setCoins(newCoins)
     }
 
     function MainDisplay() {
@@ -52,6 +53,54 @@ export default function Game() {
         return display
     }
 
+    /**
+     * Action Processing
+     */
+    function addActionLog(message) {
+        let newLog = [...actionLog]
+        newLog.unshift(message)
+        setActionLog(newLog)
+    }
+
+    function doAction(actionIndex) {
+        console.log("Doing Action")
+        let results = availbleActions[actionIndex]
+        for (const [resource, value] of Object.entries(results.effect)) {
+            switch (resource) {
+                case "wood":
+                    addWood(value)
+                    break;
+                case "coin":
+                    addCoins(value)
+                    break;
+                default:
+                    console.log("Resource Not Accounted For : ", resource)
+            }
+            addActionLog(results.message)
+        }
+    }
+
+    /**
+     * Setters
+     * */
+    
+    function addCoins(val) {
+        let prevCoins = coins
+        let newCoins = prevCoins + val
+        newCoins = newCoins > maxCoins ? maxCoins : newCoins
+        setCoins(newCoins)
+    }
+
+    function addWood(val) {
+        let prevWood = wood
+        let newWood = prevWood + val
+        newWood = newWood > maxWood ? maxWood : newWood
+        setWood(newWood)
+    }
+
+    /**
+     * Display Components
+     * */
     function ResourcesTab() {
         return (
             <Stack direction="column" sx={{ height: '100%', width: '100%', backgroundColor: 'azure', flexDirection: 'column' }}>
@@ -60,18 +109,21 @@ export default function Game() {
                         Resources
                     </Typography>
                     <Divider />
-                    <Typography>
-                        Coins: {coins}
-                    </Typography>
+                    {coins > 0 ? 
+                        <Typography>
+                            Coins: {coins}/{maxCoins}
+                        </Typography>
+                        : null}
                     <Divider />
-                    <Typography>
-                        Wood: {wood}
-                    </Typography>
+                    {wood > 0 ?
+                        <Typography>
+                            Wood: {wood}/{maxWood}
+                        </Typography>
+                        : null}
                 </Stack>
             </Stack>
         )
     }
-
 
     function Actions() {
         return (
@@ -82,14 +134,34 @@ export default function Game() {
                         Actions
                     </Typography>
                     <Divider />
-                    <Stack direction="row">
-                        <Typography>
-                            Increase a thing
-                        </Typography>
-                        <Button variant="contained" onClick={incrementCoins}>
-                            Click Me
-                        </Button>
-                    </Stack>
+                    {availbleActions.map((action, actionIndex) => {
+                        return (
+                            <Stack direction="row" key={action.name} >
+                                <Tooltip
+                                    title={
+                                        <>
+                                            <Typography color="inherit">{action.name}</Typography>
+                                            <Divider/>
+                                            <Typography color="inherit">{action.description}</Typography>
+                                        </>
+                                    }
+                                    placement="right-end">
+                                    <Button variant="outlined" onClick={() => { doAction(actionIndex) }}>
+                                        <Stack direction="column">
+                                            <Typography variant="h6">
+                                                {action.name}
+                                            </Typography>
+                                            <Divider />
+                                            <Typography variant="subtitle">
+                                                {action.description}
+                                            </Typography>
+                                        </Stack>
+                                    </Button>
+                                </Tooltip>
+                            </Stack>
+                        )
+                    })}
+
                 </Stack>
 
             </Stack>
@@ -106,8 +178,8 @@ export default function Game() {
                 </Typography>
                 {actionLog.map((logItem, logIndex) => {
                     return (
-                        <Stack sx={{ height: 'auto', width: '100%', backgroundColor: 'lightgray' }} >
-                            <Typography key={logIndex}>
+                        <Stack key={logIndex} sx={{ height: 'auto', width: '100%', backgroundColor: 'lightgray' }} >
+                            <Typography>
                                 {logItem}
                             </Typography>
                             <Divider />
@@ -118,23 +190,31 @@ export default function Game() {
         )
     }
 
+    /**
+     * render
+     * */
     return (
-        <Split style={{ height: "80vh", border: '1px solid #d5d5d5', borderRadius: 3}}>
+        <Split style={{ height: "80vh", border: '1px solid #d5d5d5', borderRadius: 3 }}>
 
-            <div style={{ flex: 1}}>
+            <div style={{ flex: 1 }}>
                 <ResourcesTab />
             </div>
-            <Split mode="vertical" style={{width:'70%'}}>
+            <Split mode="vertical" style={{ width: '70%' }}>
                 <div style={{ height: '80%' }}>
                     <Actions />
                 </div>
-                <Split style={{ height: '20%'  }}>
-                    <div style={{ flex: 1 }}>
-                        <DisplayLog/>
+                <Split style={{ height: '20%' }}>
+                    <div style={{ flex: 1, overflow: 'auto' }}>
+                        <DisplayLog />
                     </div>
                 </Split>
             </Split>
-            <div style={{ flex: 1 }}>Build Menu</div>
+            <div style={{ flex: 1 }}>
+                <ShopSidebar
+                    location={curLocation}
+                    shop={curShop}
+                />
+            </div>
 
 
         </Split>
