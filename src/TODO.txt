@@ -1,0 +1,14 @@
+Complete Models
+	- get characters working
+	- save state to local memory AND to file
+	- also loading state from file
+
+
+
+
+
+
+
+
+	//Card flipping
+	https://medium.com/@amie.n.foster/flipping-out-how-to-create-a-card-that-flips-with-react-and-css-131dba54fc96

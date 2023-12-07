@@ -1,223 +1,138 @@
 import { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { Stack, Button, Typography, Box, Divider, Paper, Tooltip } from '@mui/material';
-import Split from '@uiw/react-split'
-import SplitPane, { Pane } from 'split-pane-react';
-import ShopSidebar from './Views/ShopSidebar'
+import { observer } from "mobx-react-lite"
+import { autorun, trace, getDependencyTree, getDebugName, getObserverTree, spy } from "mobx"
+import { Stack, Button, Typography } from '@mui/material';
 import Character from './Models/Character';
-import { getAreaActions } from '../Data/ActionList'
+import ActionHandler from './Models/ActionHandler';
+import ResourceHandler from './Models/ResourceHandler';
+import ShopHandler from './Models/ShopHandler';
+import MainScreen from './MainScreen';
+import { Debugger, log, LOGGING_ENABLED, DEBUGGING_ENABLED } from './Debugger'
 
 export default function Game() {
+    /**
+     * Primary library for rendering traditional js classes reactively
+     * https://mobx.js.org/README.html 
+     * */
 
-    //Character data
-    const [curCharacter, setCurCharacter] = useState(new Character({ "name": "Billy Wigglestick" }))
-    const [availbleActions, setAvailableActions] = useState([])
+    //Set up resource stores 
+    const resourceHandler = new ResourceHandler()
+    const curCharacter = new Character({ name: "Billy Wigglestick" })
+    const actionHandler = new ActionHandler({ "curResources": resourceHandler, "curCharacter": curCharacter })
+    const shopHandler = new ShopHandler(resourceHandler, curCharacter)
+   
+    //Bind resource stores to main component via an observer (mobx)
+    const GameView = observer(({ resourceHandler, actionHandler, curCharacter, shopHandler }) => {
+        var view = <></>
 
-    //Player resources
-    const [coins, setCoins] = useState(0)
-    const [maxCoins, setMaxCoins] = useState(10)
-    const [wood, setWood] = useState(0) 
-    const [maxWood, setMaxWood] = useState(10)
-    const [resources, setResource] = useState({})
+        if (DEBUGGING_ENABLED) {
+            view = <Debugger
+                resourceHandler={resourceHandler}
+                actionHandler={actionHandler}
+                curCharacter={curCharacter}
+                shopHandler={shopHandler}
+                curLocation={curLocation}
+                log={log}
+                children={
+                    <MainScreen
+                        resourceHandler={resourceHandler}
+                        actionHandler={actionHandler}
+                        curCharacter={curCharacter}
+                        shopHandler={shopHandler}
+                        curLocation={curLocation}
+                        log={log}
+                    />
+                }
+            />
+        }
+
+        if (!DEBUGGING_ENABLED) {
+            view = <MainScreen
+                resourceHandler={resourceHandler}
+                actionHandler={actionHandler}
+                curCharacter={curCharacter}
+                shopHandler={shopHandler}
+                curLocation={curLocation}
+                log={log}
+            />
+        }
+
+
+        return view
+    })
+
+    useEffect(() => {
+        shopHandler.setCurShop("htg")
+    }, [])
+
+    //spy(event => {
+    //    //if (event.type === "reaction") {
+    //    //    console.log(`${event.name} with args: ${event.arguments}`)
+    //    //}
+    //    //if (event.type === "reaction") {
+    //    //    console.log("Event fired: ", event)
+    //    //}
+    //})
+
+    //autorun(() => {
+        //console.log("Wood is changing: ", resourceHandler.wood)
+        //trace(true)
+        //console.log(getDependencyTree(resourceHandler, "wood"))
+        //console.log(getDebugName(resourceHandler, "wood"))
+        //console.log(getObserverTree(resourceHandler, "wood"))
+        //trace(resourceHandler, "wood")
+    //})
+
+
+    //autorun("logger", reaction => {
+    //    reaction.trace()
+    //})
+    //watch objects as they change
+    //autorun(() => {
+    //    console.log("Action Handler: ", JSON.stringify(actionHandler)) // Also reads the entire structure.
+    //})
+
+
+    autorun(() => {
+        log("Resource Handler: ", JSON.stringify(resourceHandler)) // Also reads the entire structure.
+        //console.log("Resource Handler: ", JSON.stringify(resourceHandler)) // Also reads the entire structure.
+        
+    })
+
+
+    //autorun(() => {
+    //    console.log("Shop Handler: ", JSON.stringify(shopHandler)) // Also reads the entire structure.
+    //})
+
+    //autorun(() => {
+    //    console.log("CurrentShop: ", JSON.stringify(shopHandler.curShop)) // Also reads the entire structure.
+    //})
+
+    //autorun(() => {
+    //    console.log("CurrentCharacter: ", JSON.stringify(curCharacter)) // Also reads the entire structure.
+    //})
+
 
     //Game State data
     const [curLocation, setCurLocation] = useState("Village")
-    const [curShop, setCurShop] = useState(null)
-    const [actionLog, setActionLog] = useState([])
-    
+    //const [curShop, setCurShop] = useState(null)
 
-    //UX State data
-    const [currentView, setCurrentView] = useState(0)
-    const [curSidebarView, setCurSidebarView] = useState(0) 
-
-    useEffect(() => {
-        setAvailableActions(getAreaActions(curLocation, curCharacter, {"coins":coins, "wood":wood}))
-    }, [curCharacter])
-
-    /**
-     * View Processing
-     */
-    function setView(newView) {
-        setCurrentView(newView)
-    }
-
-    function MainDisplay() {
-        let display = <></>
-        switch (currentView) {
-            case 0:
-                display = (<Actions />)
-            default:
-                console.log("how did you get here?")
-        }
-
-        return display
-    }
 
     /**
      * Action Processing
      */
-    function addActionLog(message) {
-        let newLog = [...actionLog]
-        newLog.unshift(message)
-        setActionLog(newLog)
-    }
-
-    function doAction(actionIndex) {
-        console.log("Doing Action")
-        let results = availbleActions[actionIndex]
-        for (const [resource, value] of Object.entries(results.effect)) {
-            switch (resource) {
-                case "wood":
-                    addWood(value)
-                    break;
-                case "coin":
-                    addCoins(value)
-                    break;
-                default:
-                    console.log("Resource Not Accounted For : ", resource)
-            }
-            addActionLog(results.message)
-        }
-    }
-
-    /**
-     * Setters
-     * */
     
-    function addCoins(val) {
-        let prevCoins = coins
-        let newCoins = prevCoins + val
-        newCoins = newCoins > maxCoins ? maxCoins : newCoins
-        setCoins(newCoins)
-    }
-
-    function addWood(val) {
-        let prevWood = wood
-        let newWood = prevWood + val
-        newWood = newWood > maxWood ? maxWood : newWood
-        setWood(newWood)
-    }
-
-    /**
-     * Display Components
-     * */
-    function ResourcesTab() {
-        return (
-            <Stack direction="column" sx={{ height: '100%', width: '100%', backgroundColor: 'azure', flexDirection: 'column' }}>
-                <Stack sx={{ m: 5, backgroundColor: 'azure' }}>
-                    <Typography>
-                        Resources
-                    </Typography>
-                    <Divider />
-                    {coins > 0 ? 
-                        <Typography>
-                            Coins: {coins}/{maxCoins}
-                        </Typography>
-                        : null}
-                    <Divider />
-                    {wood > 0 ?
-                        <Typography>
-                            Wood: {wood}/{maxWood}
-                        </Typography>
-                        : null}
-                </Stack>
-            </Stack>
-        )
-    }
-
-    function Actions() {
-        return (
-            <Stack direction="row" sx={{ backgroundColor: 'orange' }}>
-
-                <Stack direction="column">
-                    <Typography>
-                        Actions
-                    </Typography>
-                    <Divider />
-                    {availbleActions.map((action, actionIndex) => {
-                        return (
-                            <Stack direction="row" key={action.name} >
-                                <Tooltip
-                                    title={
-                                        <>
-                                            <Typography color="inherit">{action.name}</Typography>
-                                            <Divider/>
-                                            <Typography color="inherit">{action.description}</Typography>
-                                        </>
-                                    }
-                                    placement="right-end">
-                                    <Button variant="outlined" onClick={() => { doAction(actionIndex) }}>
-                                        <Stack direction="column">
-                                            <Typography variant="h6">
-                                                {action.name}
-                                            </Typography>
-                                            <Divider />
-                                            <Typography variant="subtitle">
-                                                {action.description}
-                                            </Typography>
-                                        </Stack>
-                                    </Button>
-                                </Tooltip>
-                            </Stack>
-                        )
-                    })}
-
-                </Stack>
-
-            </Stack>
-        )
-    }
-
-
-    function DisplayLog() {
-        return (
-
-            <Stack >
-                <Typography >
-                    Action Log
-                </Typography>
-                {actionLog.map((logItem, logIndex) => {
-                    return (
-                        <Stack key={logIndex} sx={{ height: 'auto', width: '100%', backgroundColor: 'lightgray' }} >
-                            <Typography>
-                                {logItem}
-                            </Typography>
-                            <Divider />
-                        </Stack>
-                    )
-                })}
-            </Stack>
-        )
-    }
-
     /**
      * render
      * */
     return (
-        <Split style={{ height: "80vh", border: '1px solid #d5d5d5', borderRadius: 3 }}>
-
-            <div style={{ flex: 1 }}>
-                <ResourcesTab />
-            </div>
-            <Split mode="vertical" style={{ width: '70%' }}>
-                <div style={{ height: '80%' }}>
-                    <Actions />
-                </div>
-                <Split style={{ height: '20%' }}>
-                    <div style={{ flex: 1, overflow: 'auto' }}>
-                        <DisplayLog />
-                    </div>
-                </Split>
-            </Split>
-            <div style={{ flex: 1 }}>
-                <ShopSidebar
-                    location={curLocation}
-                    shop={curShop}
-                />
-            </div>
-
-
-        </Split>
-    );
+        <GameView
+            resourceHandler={resourceHandler}
+            actionHandler={actionHandler}
+            curCharacter={curCharacter}
+            shopHandler={shopHandler}
+            curLocation={curLocation}
+        />
+    )
 
 }

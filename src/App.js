@@ -1,5 +1,6 @@
 import { Routes, Route, Outlet, Link } from "react-router-dom";
 import { Stack, Button, Typography, Box, Divider } from '@mui/material';
+import { observer } from "mobx-react-lite"
 import About from './SiteComponents/About';
 import Game from './components/Game';
 import Dashboard from './SiteComponents/Dashboard'
@@ -8,6 +9,8 @@ import './App.css';
 
 
 export default function App() {
+
+
     return (
         <div>
 
@@ -17,7 +20,7 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route path="about" element={<About />} />
-                    <Route path="experiments" element={<Game />} />
+                    <Route path="experiments" element={<Game/> } />
                     <Route path="dashboard" element={<Dashboard />} />
 
                     {/* Using path="*"" means "match anything", so this route

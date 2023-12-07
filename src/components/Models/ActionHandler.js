@@ -1,21 +1,41 @@
-import { villageActions } from '../Data/Actions';
-import { LocationCodesEnum as LocCodes } from '../Enums/LocationCodesEnum';
-import { JSONCheatCopy } from '../Helpers/JSONHelpers';
+import { makeAutoObservable } from "mobx"
+import { villageActions } from '../../Data/Actions';
+import { LocationCodesEnum as LocCodes } from '../../Enums/LocationCodesEnum';
+import { JSONCheatCopy } from '../../Helpers/JSONHelpers';
+import ResourceHandler from './ResourceHandler';
+import Character from './Character';
+import { log } from '../Debugger';
 
-export class ActionHandler {
+export default class ActionHandler {
+
     constructor(args) {
+        log("Constructing Action Handler")
         this._actionList = []
-        this._unavailableActions = []
-        this._curLocation = new Location() 
-        this._curCharacter = new Character()  
-        this._curResources = {gold:7, wood:7} //new Resources()
-        if (args.hasOwnProperty("location"))
-            this._curLocation = args.location
-        if (args.hasOwnProperty("character"))
-            this._curCharacter = args.character 
-        refreshActions()
+        this._ineligibleActions = []
+        //this._curLocation = new Location() 
+        this._curLocation = {
+            locCode: "vil",
+            name: "Village",
+            tierReq: 0,
+            itemReq: [],
+            resourceReq: {}
+        }
+        //this._curCharacter = new Character()  
+        //this._curResources = { gold: 7, wood: 7 } //new Resources()
+        this._curResources = new ResourceHandler()
+        this._curCharacter = new Character()
 
-        //loadPreviewActions()
+        if (args)
+            Object.keys(args).forEach((key) => {
+                this[`_${key}`] = args[key];
+            });
+        
+        this.refreshActions()
+        makeAutoObservable(this)
+    }
+
+    get curCharacter() {
+        return this._curCharacter
     }
 
     get actions() {
@@ -28,27 +48,31 @@ export class ActionHandler {
 
     set resources(newResources) {
         this._curResources = newResources
-        refreshActions()
+        this.refreshActions()
+    }
+
+    get resources() {
+        return this._curResources
     }
 
     changeArea(location) {
         this._location = location
-        refreshActions()
+        this.refreshActions()
     }
 
     changeCharacter(character) {
         this._curCharacter = character
-        refreshActions()
+        this.refreshActions()
     }
 
     refreshActions() {
-        let refreshedList = getActionsByLocation(this._curLocation)
-        refreshedList = filterActionsByCharacter(this._curCharacter, refreshedList)
+        let refreshedList = this.getActionsByLocation(this._curLocation)
+        refreshedList = this.filterActionsByCharacter(this._curCharacter, refreshedList)
         this._actionList = refreshedList
     }
 
     refreshUnavailableActions() {
-        let refreshedActions = filterActionsByCharacter(this._curCharacter, this._unavailableActions)
+        let refreshedActions = this.filterActionsByCharacter(this._curCharacter, this._unavailableActions)
         //TODO: Combine refreshedActions with the existing Action list (.append?)
         //set the new list
     }
@@ -59,7 +83,7 @@ export class ActionHandler {
         if (location)
             filterLocation = location
 
-        switch (filterLocation.code) { //TODO. how I address parts of the location and character are probably going to change
+        switch (filterLocation.locCode) { //TODO. how I address parts of the location and character are probably going to change
             case LocCodes.Village:
                 areaList = JSONCheatCopy(villageActions)
                 break;
@@ -78,14 +102,14 @@ export class ActionHandler {
         let eligibleActions = []
 
         actions.forEach((action) => {
-            if (actionAvailable(character, action))
+            if (this.actionAvailable(character, action))
                 eligibleActions.push(action)
             else
-                unavailableActions.push(action)
+                ineligibleActions.push(action)
         })
 
-        this._unavailableActions = ineligibleActions //maybe this shouldn't get set here
-        return areaActions
+        this._ineligibleActions = ineligibleActions //maybe this shouldn't get set here
+        return eligibleActions
 
     }
 
@@ -99,7 +123,7 @@ export class ActionHandler {
         //Check resources
         if (available && action.resourceReq.length > 0) {
             for (const [resourceName, requirement] of Object.entries(action.resourceReqs)) {
-                if (resources[resourceName] < requirement) {
+                if (this._curResources[resourceName] < requirement) {
                     available = false
                 }
             }
@@ -107,17 +131,51 @@ export class ActionHandler {
 
         //Check Items
         if (available && action.itemReq.length > 0) {
-            let itemFound = false
+            let itemsFound = false
             let itemIndex = 0
-            while (!itemFound && itemIndex < action.itemReq.length) {
-                if (character.hasItem(action.itemReq[itemIndex]))
-                    itemFound = true
+            //Loop through the item reqs
+            while (!itemsFound && itemIndex < action.itemReq.length) {
+                let item = this._curCharacter.inventory.get(action.itemReq[itemIndex])
+                //if we don't find an item stop looking
+                if (item === undefined) 
+                    break //TODO: I don't like doing this. Come up with a better loop condition
                 itemIndex++
             }
-            if (!itemFound)
-                available = false
+            available = itemsFound
         }
         return available
     }
 
+    doAction(actionIndex) {
+        log("Doing Action")
+        
+        let message = "You do not have enough AP to do that action"
+        if (this._curCharacter.curAP > 0) {
+            log("You have enough AP")
+            //let results = availbleActions[actionIndex]
+            let results = this._actionList[actionIndex]
+            for (const [resource, value] of Object.entries(results.effect)) {
+                switch (resource) {
+                    case "wood":
+                        log("adding wood")
+                        this._curResources.addWood(value)
+                        break;
+                    case "coin":
+                        log("adding coins")
+                        this._curResources.addCoins(value)
+                        break;
+                    default:
+                        log("Resource Not Accounted For : ", resource)
+                }
+                //addActionLog(results.message)
+            }
+            message = results.message
+            log(message)
+            this._curCharacter._curAP = this._curCharacter.curAP - 1
+        }
+
+        return(message)
+    }
+
 }
+

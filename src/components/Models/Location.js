@@ -1,5 +1,14 @@
 import { Shops } from '../../Data/Shops';
 
+
+const emptyLocation = {
+        locCode : "vil",
+        name : "Village",
+        tierReq : 0,
+        itemReq : [],
+        resourceReq: {}
+}
+
 export default class Location {
     constructor(args) {
         this._LocCode = args.locCode
