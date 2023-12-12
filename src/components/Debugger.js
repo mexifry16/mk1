@@ -1,23 +1,25 @@
 import { useEffect } from 'react';
 import { observer } from "mobx-react-lite"
 import { autorun, trace, getDependencyTree, getDebugName, getObserverTree, spy } from "mobx"
-
-/*
+/**
  * DEBUGGING SETTINGS
  * */
-const SPY_ENABLED = false
-const LOGGING_CHARACTER = false
+export const DEBUGGING_ENABLED = true //If true program inserts debugging component into root of the game
+export const CONSOLE_LOGGING_ENABLED = true // If true console logs will be printed
+const SPY_ENABLED = false //Enables the mobx spy to run. Customize the effect for useful results
+
+//Enable specific object auto prints
+const LOGGING_ALL = false
+const LOGGING_CHARACTER = true
 const LOGGING_ACTION_HANDLER = false
 const LOGGING_RESOURCES = false
 const LOGGING_SHOP = false
 const LOGGING_SHOP_HANDLER = false
-export const LOGGING_ENABLED = false
-export const DEBUGGING_ENABLED = false
 
 const logg = console.log
 
 export function log(message, object) {
-    if (LOGGING_ENABLED) {
+    if (CONSOLE_LOGGING_ENABLED) {
         if (message && object)
             logg(message, object)
         if (message && !object)
@@ -80,6 +82,26 @@ export const Debugger = observer(({ resourceHandler, actionHandler, curCharacter
             autorun(() => {
                 console.log("currentshop: ", JSON.stringify(shopHandler)) // also reads the entire structure.
             })
+    }, [])
+
+    useEffect(() => {
+        if (LOGGING_ALL) {
+            autorun(() => {
+                console.log("currentshop: ", JSON.stringify(shopHandler)) // also reads the entire structure.
+            })
+            autorun(() => {
+                console.log("currentshop: ", JSON.stringify(shopHandler.curshop)) // also reads the entire structure.
+            })
+            autorun(() => {
+                console.log("Resource Handler: ", JSON.stringify(resourceHandler)) // Also reads the entire structure.
+            })
+            autorun(() => {
+                console.log("action handler: ", JSON.stringify(actionHandler)) // also reads the entire structure.
+            })
+            autorun(() => {
+                console.log("currentcharacter: ", JSON.stringify(curCharacter)) // also reads the entire structure.
+            })
+        }
     }, [])
       
     return (<>{children}</>)

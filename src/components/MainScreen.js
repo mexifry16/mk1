@@ -91,6 +91,13 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
         )
     })
 
+
+    //const ResourcesTab = observer(({ resourceHandler, actionHandler }) => {
+
+
+
+    //})
+
     /**
      * Display Components
      * */
@@ -120,6 +127,8 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
         )
     })
 
+
+
     const Actions = observer(({ resourceHandler, actionHandler, test }) => {
 
         
@@ -136,10 +145,6 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
 
         return (
             <Stack direction="row" sx={{ backgroundColor: 'orange' }}>
-                <Button onClick={() => { actionHandler.doAction(0) }}>
-                    test test test
-                </Button>
-
                 <Stack direction="column">
                     <Typography>
                         Actions

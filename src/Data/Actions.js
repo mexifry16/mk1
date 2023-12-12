@@ -39,19 +39,19 @@ export const villageActions = [
         message: "You take your most recent harvest to market and manage to sell a few cabbages and some string beans",//TODO Can some of these be procedural?
         repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
     },
-    //{
-    //    id: 0,
-    //    name: "Speak With Father",
-    //    description: "At least you get an allowance",
-    //    tierReq: 1,
-    //    resourceReq: {},
-    //    itemReq: [],
-    //    cost: {},
-    //    effect: { fate: 1 },
-    //    reward: {},
-    //    message: "Your father tells you stories of his childhood",
-    //    repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
-    //},
+    {
+        id: 0,
+        name: "Rest",
+        description: "Finally time to rest",
+        tierReq: 0,
+        resourceReq: {},
+        itemReq: [],
+        cost: {},
+        effect: { rest:0 },
+        reward: {},
+        message: "You sleep and dream of gold and glory",
+        repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
+    },
     {
         id: 0,
         name: "Cook Bread",

@@ -29,7 +29,7 @@ export default class ActionHandler {
             Object.keys(args).forEach((key) => {
                 this[`_${key}`] = args[key];
             });
-        
+
         this.refreshActions()
         makeAutoObservable(this)
     }
@@ -137,7 +137,7 @@ export default class ActionHandler {
             while (!itemsFound && itemIndex < action.itemReq.length) {
                 let item = this._curCharacter.inventory.get(action.itemReq[itemIndex])
                 //if we don't find an item stop looking
-                if (item === undefined) 
+                if (item === undefined)
                     break //TODO: I don't like doing this. Come up with a better loop condition
                 itemIndex++
             }
@@ -147,14 +147,23 @@ export default class ActionHandler {
     }
 
     doAction(actionIndex) {
-        log("Doing Action")
-        
+        log("Doing Action (Action Handler)")
+        let action = this._actionList[actionIndex]
         let message = "You do not have enough AP to do that action"
-        if (this._curCharacter.curAP > 0) {
+        let skipSwitch = false
+
+        //Handle resting here so we don't spend AP
+        if ("rest" in action.effect) {
+            this._curCharacter.rest()
+            message = action.message
+            log(action.message)
+            skipSwitch = true
+        }
+
+        if (this._curCharacter.curAP > 0 && !skipSwitch) {
             log("You have enough AP")
             //let results = availbleActions[actionIndex]
-            let results = this._actionList[actionIndex]
-            for (const [resource, value] of Object.entries(results.effect)) {
+            for (const [resource, value] of Object.entries(action.effect)) {
                 switch (resource) {
                     case "wood":
                         log("adding wood")
@@ -169,7 +178,7 @@ export default class ActionHandler {
                 }
                 //addActionLog(results.message)
             }
-            message = results.message
+            message = action.message
             log(message)
             this._curCharacter._curAP = this._curCharacter.curAP - 1
         }

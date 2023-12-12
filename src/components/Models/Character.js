@@ -16,6 +16,7 @@ export default class{
         this._curAP = 4
         this._inventory = new Map()
         this._status = ["well"]
+        this._equipped = new Map([["head", null],["chest", null],["weapon", null]])
         this._fate = 0
         this._LCK = 0
         this._STR = 1
@@ -82,8 +83,10 @@ export default class{
         return this._curAP
     }
 
-    restoreAP(quantity) {
+    rest(quantity) {
+        log("resting: ", quantity)
         quantity = quantity ?? this._AP
+        log(`Restoring ${quantity} AP`)
         this._curAP = this._AP
     }
 
@@ -134,6 +137,30 @@ export default class{
     hasItem(itemID) {
         let quantity = this._inventory.get(itemID)
         return quantity != undefined && quantity > 0
+    }
+
+    get helmet() {
+        return this._equipped.get("helmet")
+    }
+
+    get chest() {
+        return this._equipped.get("chest")
+    }
+
+    get weapon() {
+        return this._equipped.get("weapon")
+    }
+
+    set helmet(itemCode) {
+        this._equipped.set("helmet", itemCode)
+    }
+
+    set chest(itemCode) {
+        this._equipped.set("chest", itemCode)
+    }
+
+    set weapon(itemCode) {
+        this._equipped.set("weapon", itemCode)
     }
 
     travel() {
