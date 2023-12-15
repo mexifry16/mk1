@@ -10,6 +10,7 @@ export const villageActions = [
         effect: { wood: 1 },
         reward: {},
         message: "You punch the tree until a log falls out",
+        messages: ["Your fist slams into the tree and leaves a sizable dent", "Your fist widens the whole created previously", "You manage to punch through the tree", "You fell the tree with your fists and gather its wood"],
         repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
         
     },
@@ -24,6 +25,9 @@ export const villageActions = [
         effect: { wood: 5 },
         reward: {},
         message: "You chop down a tree. and gather a few logs ",
+        messages: ["Your axe bites into the tree", "You fell the tree and gather its wood"],
+        //progressMessage: "You chop down a tree. and gather a few logs ",
+
         repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
     },
     {
@@ -37,6 +41,7 @@ export const villageActions = [
         effect: { coin: 1 },
         reward: {},
         message: "You take your most recent harvest to market and manage to sell a few cabbages and some string beans",//TODO Can some of these be procedural?
+        messages: ["You take your most recent harvest to market and manage to sell a few cabbages and some string beans"],//TODO Can some of these be procedural?
         repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
     },
     {
@@ -50,6 +55,7 @@ export const villageActions = [
         effect: { rest:0 },
         reward: {},
         message: "You sleep and dream of gold and glory",
+        messages: ["You sleep and dream of gold and glory"],
         repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
     },
     {
@@ -63,6 +69,7 @@ export const villageActions = [
         effect: {},
         reward: { bread: 1 },
         message: "The smell of baking bread permeates your home",
+        messages: ["The smell of baking bread permeates your home"],
         repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
     },
     {
@@ -76,6 +83,7 @@ export const villageActions = [
         effect: {},
         reward: { randomVeggie: 1 },
         message: "You spend hours picking weeds and watering vegetables.",
+        messages: ["You spend hours picking weeds and watering vegetables."],
         repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
     },
     {
@@ -89,6 +97,7 @@ export const villageActions = [
         effect: {},
         reward: { randomVeggie: 1 },
         message: "You spend hours picking weeds and watering vegetables.",
+        messages: ["You spend hours picking weeds and watering vegetables."],
         repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
     }
 

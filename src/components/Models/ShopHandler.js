@@ -62,17 +62,37 @@ export default class ShopHandler {
 
     }
 
-    makePurchase(itemCode, quantity, character) {
-        log(`Buying ${quantity} of ${itemCode}`)
+    makePurchase(itemCode, quantity) {
+        //log(`Buying ${quantity} of ${itemCode}`)
         let quantityToBuy = quantity ?? 1
         //make the purchase
         let results = this.curShop.makePurchase(itemCode, quantity)
-        log(`Purchased ${results.totalPurchased} of ${results.totalCost}`)
+        //log(`Purchased ${results.totalPurchased} of ${results.totalCost}`)
         //calculate the cost
         //add the item to the character
-        character.addItem(itemCode, quantity)
+        //character.addItem(itemCode, quantity)
         //remove the cost from the player
         this._curResources.remCoins(results.totalCost)
+        return results
     }
 
+    isItemDisabled(item, character) {
+        //log("checking: ", item)
+        let disabled = true
+        //let allRequirementsMet = true
+        let price = this.determinePrice(item)
+        //log(`User has ${this._curResources.coins} coins`)
+        if (this._curResources.coins >= price) {
+            disabled = false
+        }
+        //log(`${item} is ${disabled ? "disabled" : "enabled" }`)
+        return disabled
+    }
+
+    determinePrice(item, character) {
+        let tier = item.tier ?? 1
+        //maybe price goes up  and down for tier mismatch? lower tier gets cheaper, higher tier gets cheaper as character tiers up
+        //log("Price: ", tier * 2)
+        return tier * 2
+    }
 }

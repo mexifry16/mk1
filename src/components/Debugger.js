@@ -10,9 +10,9 @@ const SPY_ENABLED = false //Enables the mobx spy to run. Customize the effect fo
 
 //Enable specific object auto prints
 const LOGGING_ALL = false
-const LOGGING_CHARACTER = true
+const LOGGING_CHARACTER = false
 const LOGGING_ACTION_HANDLER = false
-const LOGGING_RESOURCES = false
+const LOGGING_RESOURCES = true
 const LOGGING_SHOP = false
 const LOGGING_SHOP_HANDLER = false
 

@@ -4,7 +4,10 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from
 import { Stack, Button, Typography, Box, Divider, Paper, Tooltip, Badge, Avatar } from '@mui/material';
 import Split from '@uiw/react-split'
 import SplitPane, { Pane } from 'split-pane-react';
-import ShopSidebar from './Views/ShopSidebar'
+import Sidebar from './UI/Sidebar';
+import ShopSidebar from './Views/ShopSidebar';
+import { ResourceDisplay } from './Views/ResourceDisplay';
+import { CharacterInventory } from './Views/CharacterInventory';
 import ruby from '../Assets/ruby.png';
 import spentRuby from '../Assets/spentRuby.png';
 import { log } from './Debugger';
@@ -28,6 +31,8 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
     //UX State data
     const [currentView, setCurrentView] = useState(0)
     const [curSidebarView, setCurSidebarView] = useState(0)
+    //const [leftSidebar, setLeftSidebar] = useState(0)
+    //const [rightSidebar, setRightSidebar] = useState(0)
     const [actionLog, setActionLog] = useState([])
 
     function addActionLog(message) {
@@ -64,15 +69,15 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
 
 
     const CharacterDetails = observer(({ curCharacter }) => {
-        let ActiveGem = <Avatar src={ruby} />
-        let inactiveGem = <Avatar src={spentRuby} />
+        //let ActiveGem = <Avatar src={ruby} />
+        //let inactiveGem = <Avatar src={spentRuby} />
 
         let gems = []
         for (let i = 0; i < curCharacter.AP; i++) {
             if (i < curCharacter.curAP)
-                gems.push(ActiveGem)
+                gems.push(<Avatar key={i} src={ruby} />)
             if (i >= curCharacter.curAP)
-                gems.push(inactiveGem)
+                gems.push(<Avatar key={i} src={spentRuby} />)
         }
 
         return (
@@ -103,9 +108,9 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
      * */
     const ResourcesTab = observer(({ resourceHandler, actionHandler }) => {
         return (
-            <Stack direction="column" sx={{ height: '100%', width: '100%', backgroundColor: 'azure', flexDirection: 'column' }}>
-                <Stack sx={{ m: 5, backgroundColor: 'azure' }}>
-                    <Typography>
+            <Stack direction="column" sx={{flexDirection: 'column' }}>
+                <Stack sx={{ m: 5}}>
+                    <Typography variant="h5">
                         Resources
                     </Typography>
                     <Divider />
@@ -213,11 +218,19 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
         <Split style={{ height: "80vh", border: '1px solid #d5d5d5', borderRadius: 3 }}>
 
             <div style={{ flex: 1 }}>
-                <ResourcesTab resourceHandler={resourceHandler} actionHandler={actionHandler} />
+                <Sidebar children={
+                    [
+                        <ResourceDisplay key={0} resourceHandler={resourceHandler} actionHandler={actionHandler} />,
+                        <CharacterInventory key={1} curCharacter={curCharacter} />
+                        
+                    ]
+                }>
+                    
+                </Sidebar>
             </div>
             <Split mode="vertical" style={{ width: '70%' }}>
                 <div style={{ height: '80%' }}>
-                <CharacterDetails curCharacter={curCharacter} />
+                    <CharacterDetails curCharacter={curCharacter} />
                     <Actions resourceHandler={resourceHandler} actionHandler={actionHandler} test={test} />
                 </div>
                 <Split style={{ height: '20%' }}>

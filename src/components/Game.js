@@ -65,32 +65,6 @@ export default function Game() {
         shopHandler.setCurShop("htg")
     }, [])
 
-    //spy(event => {
-    //    //if (event.type === "reaction") {
-    //    //    console.log(`${event.name} with args: ${event.arguments}`)
-    //    //}
-    //    //if (event.type === "reaction") {
-    //    //    console.log("Event fired: ", event)
-    //    //}
-    //})
-
-    //autorun(() => {
-        //console.log("Wood is changing: ", resourceHandler.wood)
-        //trace(true)
-        //console.log(getDependencyTree(resourceHandler, "wood"))
-        //console.log(getDebugName(resourceHandler, "wood"))
-        //console.log(getObserverTree(resourceHandler, "wood"))
-        //trace(resourceHandler, "wood")
-    //})
-
-
-    //autorun("logger", reaction => {
-    //    reaction.trace()
-    //})
-    //watch objects as they change
-    //autorun(() => {
-    //    console.log("Action Handler: ", JSON.stringify(actionHandler)) // Also reads the entire structure.
-    //})
 
 
     autorun(() => {
@@ -98,19 +72,6 @@ export default function Game() {
         //console.log("Resource Handler: ", JSON.stringify(resourceHandler)) // Also reads the entire structure.
         
     })
-
-
-    //autorun(() => {
-    //    console.log("Shop Handler: ", JSON.stringify(shopHandler)) // Also reads the entire structure.
-    //})
-
-    //autorun(() => {
-    //    console.log("CurrentShop: ", JSON.stringify(shopHandler.curShop)) // Also reads the entire structure.
-    //})
-
-    //autorun(() => {
-    //    console.log("CurrentCharacter: ", JSON.stringify(curCharacter)) // Also reads the entire structure.
-    //})
 
 
     //Game State data

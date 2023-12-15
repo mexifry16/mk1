@@ -2,9 +2,10 @@ import { makeAutoObservable } from "mobx"
 import { keyExists } from '../../Helpers/JSONHelpers';
 import { Items } from '../../Data/Items';
 import { log } from '../Debugger';
+import { JSONCheatCopy } from '../../Helpers/JSONHelpers';
 
 
-export default class{
+export default class {
 
     constructor(args) {
         this._name = "New Character"
@@ -14,9 +15,30 @@ export default class{
         this._tier = 1
         this._AP = 5
         this._curAP = 4
+        //this._inventory = new Map([
+        //    ["axe", {
+        //        "id": 0,
+        //        "name": "Axe",
+        //        "description": "Belonged to your father",
+        //        "lvlReq": 0,
+        //        "tier": 1,
+        //        "tags": ["chopsWood", "weapon", "dualWield", "slashing", "close"],
+        //        "location": ["vil"],
+        //        "quantity": 1
+        //    }],
+        //    ["wlt", {
+        //        "id": 1,
+        //        "name": "Wallet",
+        //        "description": "brown leather",
+        //        "lvlReq": 0,
+        //        "tier": 1,
+        //        "tags": ["goldStoreSmall"],
+        //        "quantity": 1
+        //    }]
+        //])
         this._inventory = new Map()
         this._status = ["well"]
-        this._equipped = new Map([["head", null],["chest", null],["weapon", null]])
+        this._equipped = new Map([["head", null], ["chest", null], ["weapon", null]])
         this._fate = 0
         this._LCK = 0
         this._STR = 1
@@ -28,7 +50,7 @@ export default class{
         this._LCK = 1
         this.class = 'Peasant'
 
-            //TODO SHOULD BE keyExistsAndHasValue()
+        //TODO SHOULD BE keyExistsAndHasValue()
         //if (keyExists(args, "name"))
         //    this.name = args.name
         //if(keyExists(args, "lvl"))
@@ -130,13 +152,15 @@ export default class{
         this._LCK = newLuck
     }
 
+
     get inventory() {
         return this._inventory
     }
 
     hasItem(itemID) {
-        let quantity = this._inventory.get(itemID)
-        return quantity != undefined && quantity > 0
+        let selectedItem = this._inventory.get(itemID)
+        //return quantity != undefined && quantity > 0
+        return (selectedItem.quantity ?? 0) > 0
     }
 
     get helmet() {
@@ -172,20 +196,39 @@ export default class{
     }
 
     addItem(itemCode, quantity) {
+        log("Adding item: ", itemCode)
         quantity = quantity ?? 1
-        this._inventory.set(itemCode, quantity)
-    }
+        //check to see if we already have it
+        let item = this._inventory.get(itemCode)
+
+        //If we already have it them increment
+        if (item != undefined) {
+            item.quanity = item.quantity ?? 1
+            item.quantity += quantity
+        }
+
+        //If item is still undefined create a new item
+        if (item == undefined) {
+            item = JSONCheatCopy(Items[itemCode])
+            item.quantity = 1
+            this._inventory.set(itemCode, item)
+        }
+}
 
     removeItem(itemCode, quantity) {
-        let curQuantity = this._inventory.get(itemCode)
+        let selectedItem = this._inventory.get(itemCode)
 
         //If we find it then modify the entry
-        if (curQuantity != undefined) {
+        if (selectedItem != undefined) {
+            let curQuantity = selectedItem.quantity ?? 1
+
             let newQuantity = curQuantity - (quantity ?? 1)
             if (newQuantity < 1)
                 this._inventory.delete(itemCode)
-            else
-                this._inventory.set(itemCode, newQuantity)
+            else {
+                selectedItem.quantity = newQuantity
+                this._inventory.set(itemCode, selectedItem)
+            }
         }
 
     }
@@ -206,14 +249,14 @@ export default class{
     }
 
     get DEF() {
-        return this._DEX + this._CON 
+        return this._DEX + this._CON
     }
 
-   
 
-    
+
+
     //TODO: EQUIPMENT
     //TODO BUFFS
     //TODO: COMBAT
-    
+
 }

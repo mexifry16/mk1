@@ -167,7 +167,7 @@ export default function TODO() {
             <List>
                 {todo.map((item, itemIndex) => {
                     return (
-                        <ListItem key={item.name} divider={true} sx={{ width: "100%", m: 'auto', backgroundColor: 'lightgreen', borderRadius: 2 }}>
+                        <ListItem key={itemIndex} divider={true} sx={{ width: "100%", m: 'auto', backgroundColor: 'lightgreen', borderRadius: 2 }}>
                             <ListItemAvatar>
                                 <ArrowRightIcon />
                             </ListItemAvatar>
@@ -186,8 +186,7 @@ export default function TODO() {
                             </IconButton>
                         </ListItem>
                     )
-                })
-                }
+                })}
             </List >
             <AddItem/>
         </Stack>

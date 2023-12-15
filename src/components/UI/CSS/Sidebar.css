@@ -1,0 +1,18 @@
+.sidebar {
+    background-color: #2C5A2D;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+    .sidebar.container {
+        background-color: #2C5A44;
+        border-radius: 10px;
+        height: auto;
+        margin-left: 2%;
+        margin-right: 2%;
+        margin-top: 2%;
+        margin-bottom: 2%;
+        border: 1px outset;
+    }
+

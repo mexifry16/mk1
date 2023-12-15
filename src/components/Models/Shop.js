@@ -66,6 +66,26 @@ export default class Shop {
         return this._inventory
     }
 
+    get inventoryArray() {
+        return this._inventory.entries()
+    }
+
+    sortedInventoryArray(sortBy) {
+        if (sortBy === undefined)
+            sortBy = "name"
+        let sortedInventory = this.inventoryArray()
+
+        //only two real cases, numeric or string
+        switch (sortBy) {
+            //list numeric cases
+            case "tier":
+                break
+            default:
+                //otherwise assume string case
+        }
+
+    }
+
     get location() {
         return this._location
     }
@@ -147,4 +167,5 @@ export default class Shop {
         this._curGold += totalCost
         return { totalPurchased: totalPurchased, totalCost: totalCost }
     }
+
 }
