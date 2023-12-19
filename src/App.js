@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite"
 import About from './SiteComponents/About';
 import Game from './components/Game';
 import Dashboard from './SiteComponents/Dashboard'
+import DiceRoller from './SiteComponents/DiceRoller'
 import logo from './logo.svg';
 import './App.css';
 
@@ -22,6 +23,7 @@ export default function App() {
                     <Route path="about" element={<About />} />
                     <Route path="experiments" element={<Game/> } />
                     <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="dashboard" element={<DiceRoller />} />
 
                     {/* Using path="*"" means "match anything", so this route
                 acts like a catch-all for URLs that we don't have explicit

@@ -10,7 +10,10 @@ import { ResourceDisplay } from './Views/ResourceDisplay';
 import { CharacterInventory } from './Views/CharacterInventory';
 import ruby from '../Assets/ruby.png';
 import spentRuby from '../Assets/spentRuby.png';
+import amythystXS from '../Assets/amythystXS.png';
+import spentAmythystXS from '../Assets/spentAmythystXS.png';
 import { log } from './Debugger';
+
 
 export default function MainScreen({ resourceHandler, actionHandler, curCharacter, shopHandler, curLocation, test }) {
 
@@ -22,11 +25,6 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
             actionHandler={actionHandler}
             curCharacter={curCharacter}
         />)
-
-    //Game State data
-    //const [curLocation, setCurLocation] = useState("Village")
-    //const [curShop, setCurShop] = useState(null)
-    //const [actionLog, setActionLog] = useState([])
 
     //UX State data
     const [currentView, setCurrentView] = useState(0)
@@ -40,13 +38,6 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
         newLog.unshift(message)
         setActionLog(newLog)
     }
-
-    //function doAction(actionIndex) {
-    //    addActionLog(actionHandler.doAction(actionIndex))
-    //    let newlog = [...actionlog]
-    //    newlog.unshift(message)
-    //    setActionList(newLog)
-    //} 
 
     /**
      * View Processing
@@ -69,9 +60,6 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
 
 
     const CharacterDetails = observer(({ curCharacter }) => {
-        //let ActiveGem = <Avatar src={ruby} />
-        //let inactiveGem = <Avatar src={spentRuby} />
-
         let gems = []
         for (let i = 0; i < curCharacter.AP; i++) {
             if (i < curCharacter.curAP)
@@ -96,43 +84,9 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
         )
     })
 
-
-    //const ResourcesTab = observer(({ resourceHandler, actionHandler }) => {
-
-
-
-    //})
-
     /**
      * Display Components
      * */
-    const ResourcesTab = observer(({ resourceHandler, actionHandler }) => {
-        return (
-            <Stack direction="column" sx={{flexDirection: 'column' }}>
-                <Stack sx={{ m: 5}}>
-                    <Typography variant="h5">
-                        Resources
-                    </Typography>
-                    <Divider />
-                    {//resourceHandler.coins > 0 ? 
-                    }
-                    <Typography>
-                        Coins: {resourceHandler.coins}/{resourceHandler.maxCoins}
-                    </Typography>
-                    {// }: null}
-                    }
-                    <Divider />
-                    {resourceHandler.wood > 0 ?
-                        <Typography>
-                            Wood: {resourceHandler.wood}/{resourceHandler.maxWood}
-                        </Typography>
-                        : null}
-                </Stack>
-            </Stack>
-        )
-    })
-
-
 
     const Actions = observer(({ resourceHandler, actionHandler, test }) => {
 
@@ -140,10 +94,29 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
 
         function doAction(actionIndex) {
             log("Doing action (Action Display)")
-            let result = actionHandler.doAction(actionIndex)
+            let result = actionHandler.attemptAction(actionIndex)
             log("Results: ", result)
             addActionLog(result)
   
+        }
+
+        function DisplayActionProgress({ progress }) {
+            log("Getting progress")
+            log("Progress: ", progress)
+            const progressDisplay = []
+            for (let gemIndex = 0; gemIndex < progress.total; gemIndex++ ) {
+                log("Loop: ", gemIndex)
+                if (gemIndex < progress.completed) {
+                    log("Adding completed gem")
+                    progressDisplay.push(<Avatar key={gemIndex} src={amythystXS} sx={{maxWidth:20, maxHeight:25}}/>)
+                }
+                if (gemIndex >= progress.completed) {
+                    log("Adding incompleted gem")
+                    progressDisplay.push(<Avatar key={gemIndex} src={spentAmythystXS} sx={{ maxWidth: 20, maxHeight: 25 }} />)
+                }
+            }
+            log("total: ", progressDisplay.length)
+            return progressDisplay
         }
 
 
@@ -168,12 +141,17 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
                                         </>
                                     }
                                     placement="right-end">
-                                    <Button variant="outlined" onClick={() => { doAction(actionIndex)}}>
+                                    <Button variant="outlined" onClick={() => { doAction(action.actionCode)}}>
                                         <Stack direction="column">
                                             <Typography variant="h6">
                                                 {action.name}
                                             </Typography>
                                             <Divider />
+                                            <Stack direction="row">
+                                                test
+                                            <DisplayActionProgress progress={action.clock.progress }/>
+                                                
+                                            </Stack>
                                             <Typography variant="subtitle">
                                                 {action.description}
                                             </Typography>
@@ -240,13 +218,22 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
                 </Split>
             </Split>
             <div style={{ flex: 1 }}>
-                <ShopSidebarView
-                    location={curLocation}
-                    shopHandler={shopHandler}
-                    resourceHandler={resourceHandler}
-                    actionHandler={actionHandler}
-                    curCharacter={curCharacter}
-                />
+                <Sidebar children={
+                    [
+                        <ShopSidebarView
+                            key={0}
+                            location={curLocation}
+                            shopHandler={shopHandler}
+                            resourceHandler={resourceHandler}
+                            actionHandler={actionHandler}
+                            curCharacter={curCharacter}
+                        />
+
+                    ]
+                }>
+
+                </Sidebar>
+               
             </div>
 
 

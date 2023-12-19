@@ -13,14 +13,12 @@ export const ResourceDisplay = observer(({ resourceHandler }) => {
                 <Typography>
                     Coins: {resourceHandler.coins}/{resourceHandler.maxCoins}
                 </Typography>
-                {resourceHandler.wood > 0 ?
-                    <>
-                        <Divider />
-                        <Typography>
-                            Wood: {resourceHandler.wood}/{resourceHandler.maxWood}
-                        </Typography>
-                    </>
-                    : null}
+                <>
+                    <Divider />
+                    <Typography>
+                        Wood: {resourceHandler.wood}/{resourceHandler.maxWood}
+                    </Typography>
+                </>
             </Stack>
         </Stack>
     )

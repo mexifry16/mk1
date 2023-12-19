@@ -64,24 +64,25 @@ export default function ShopSidebar({ curCharacter, shopHandler, curLocation, re
     }
 
     return (
-        <Box sx={{ flexGrow: 1 }}>
+        <Box sx={{ flexGrow: 1, textAlign:"center", pr:5, pl:5}}>
             {curShop === undefined ? (
                 <>
                     No Shop Selected
                 </>
             ) : (
                 <>
-                    <Typography>
+                    <Typography variant="h5">
                         {curShop.name}
-                    </Typography>
-                    <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                        </Typography>
+                        <Divider/>
+                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }} >
                         {Array.from(curShop.inventory.keys()).map((code, itemIndex) => {
                             //log("Mapping item: ", code)
                             //log("All items: ", Array.from(curShop.inventory.entries()))
                             return (
                                 <Grid item xs={2} sm={4} md={4} key={itemIndex}>
                                     <Tooltip>
-                                        <Paper>
+                                        <Paper sx={{minHeight: 75, minWidth:75, maxHeight:150, maxWidth:75, m:"auto"}}>
                                             <Button
                                                 disabled={disabledStock[itemIndex]}
                                                 //foo() works, foo doesn't. foo() only runs once

@@ -11,7 +11,7 @@ const SPY_ENABLED = false //Enables the mobx spy to run. Customize the effect fo
 //Enable specific object auto prints
 const LOGGING_ALL = false
 const LOGGING_CHARACTER = false
-const LOGGING_ACTION_HANDLER = false
+const LOGGING_ACTION_HANDLER = true
 const LOGGING_RESOURCES = true
 const LOGGING_SHOP = false
 const LOGGING_SHOP_HANDLER = false
@@ -20,6 +20,7 @@ const logg = console.log
 
 export function log(message, object) {
     if (CONSOLE_LOGGING_ENABLED) {
+        
         if (message && object)
             logg(message, object)
         if (message && !object)
