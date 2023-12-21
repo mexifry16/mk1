@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite"
+import { runInAction } from "mobx"
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { Stack, Button, Typography, Box, Divider, Paper, Tooltip, Badge, Avatar } from '@mui/material';
+import { Stack, Button, IconButton, Typography, Box, Divider, Paper, Tooltip, Badge, Avatar, Drawer, AppBar, Toolbar } from '@mui/material';
 import Split from '@uiw/react-split'
 import SplitPane, { Pane } from 'split-pane-react';
+import MenuIcon from '@mui/icons-material/Menu';
 import Sidebar from './UI/Sidebar';
 import ShopSidebar from './Views/ShopSidebar';
 import { ResourceDisplay } from './Views/ResourceDisplay';
@@ -15,7 +17,47 @@ import spentAmythystXS from '../Assets/spentAmythystXS.png';
 import { log } from './Debugger';
 
 
-export default function MainScreen({ resourceHandler, actionHandler, curCharacter, shopHandler, curLocation, test }) {
+
+
+export default function MainScreen({ resourceHandler, actionHandler, curCharacter, shopHandler, curLocation, test, attemptAction }) {
+
+    //useEffect(() => {
+    //    let diceBox = document.getElementById("dice-box")
+    //    if (diceBox != null) {
+    //        log("Dicebox element found, initiating")
+    //        //Dice.init().then(() => {
+    //        //    // clear dice on click anywhere on the screen
+    //        //    document.addEventListener("mousedown", () => {
+    //        //        const diceBoxCanvas = document.getElementById("dice-canvas");
+    //        //        if (window.getComputedStyle(diceBoxCanvas).display !== "none") {
+    //        //            Dice.hide().clear();
+    //        //        }
+    //        //    });
+    //        //});
+    //    }
+    //},[])
+
+    const rollDice = (e) => {
+        e.preventDefault();
+        //const attr = e.currentTarget.id.replace("roll-", "");
+        //if (attr === "all") {
+        //    return onRoll(["3d6", "3d6", "3d6", "3d6", "3d6", "3d6"]);
+        //}
+        //onRoll("3d6");
+    };
+   
+
+    const [menuBarOpen, setMenuBarOpen] = useState(false)
+
+    const toggleDrawer = (open) => (event) => {
+        log("test")
+        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+            log("Event was tab or shift. Aborting")
+            return;
+        }
+        log("Opening menu bar")
+        setMenuBarOpen(open);
+    }
 
     const ShopSidebarView = observer(({ curCharacter, shopHandler, curLocation, resourceHandler, actionHandler }) =>
         <ShopSidebar
@@ -28,16 +70,13 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
 
     //UX State data
     const [currentView, setCurrentView] = useState(0)
-    const [curSidebarView, setCurSidebarView] = useState(0)
-    //const [leftSidebar, setLeftSidebar] = useState(0)
-    //const [rightSidebar, setRightSidebar] = useState(0)
-    const [actionLog, setActionLog] = useState([])
+    //const [actionLog, setActionLog] = useState([])
 
-    function addActionLog(message) {
-        let newLog = [...actionLog]
-        newLog.unshift(message)
-        setActionLog(newLog)
-    }
+    //function addActionLog(message) {
+    //    let newLog = [...actionLog]
+    //    newLog.unshift(message)
+    //    setActionLog(newLog)
+    //}
 
     /**
      * View Processing
@@ -59,27 +98,37 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
     }
 
 
-    const CharacterDetails = observer(({ curCharacter }) => {
+    const CharacterDetails = observer(({ actionHandler }) => {
         let gems = []
-        for (let i = 0; i < curCharacter.AP; i++) {
-            if (i < curCharacter.curAP)
+        for (let i = 0; i < actionHandler.curCharacter.AP; i++) {
+            if (i < actionHandler.curCharacter.curAP)
                 gems.push(<Avatar key={i} src={ruby} />)
-            if (i >= curCharacter.curAP)
+            if (i >= actionHandler.curCharacter.curAP)
                 gems.push(<Avatar key={i} src={spentRuby} />)
         }
 
         return (
-            <Stack direction="column">
-                <Typography variant="h4">
-                    {curCharacter.name}
-                </Typography>
-                <Stack direction="row">
-                    <Typography variant="h5">
-                        Action Points:
+            <Stack direction="row">
+                <Stack direction="column">
+                    <Typography variant="h4">
+                        {actionHandler.curCharacter.name}
                     </Typography>
-                    {gems}
+                    <Stack direction="row">
+                        <Typography variant="h5">
+                            Action Points:
+                        </Typography>
+                        {gems}
+
+                    </Stack>
 
                 </Stack>
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => { actionHandler.rest() }}
+                    sx={{ position: "absolute", top: "20%", bottom: "20%", right: "2%", minWidth: 100 }}>
+                    REST
+                </Button>
             </Stack>
         )
     })
@@ -88,38 +137,37 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
      * Display Components
      * */
 
-    const Actions = observer(({ resourceHandler, actionHandler, test }) => {
+    const Actions = observer(({ resourceHandler, actionHandler, attemptAction }) => {
 
-        
 
-        function doAction(actionIndex) {
-            log("Doing action (Action Display)")
-            let result = actionHandler.attemptAction(actionIndex)
-            log("Results: ", result)
-            addActionLog(result)
-  
-        }
+
+        //function doAction(actionIndex) {
+        //    //log("Doing action (Action Display)")
+        //    let outcome = actionHandler.attemptAction(actionIndex)
+        //    log("++++++++++++++++++++++++++++++++++++++++++")
+        //    log("Results: ", outcome)
+        //    //addActionLog(result)
+
+        //}
 
         function DisplayActionProgress({ progress }) {
-            log("Getting progress")
-            log("Progress: ", progress)
+            //log("Getting progress")
+            //log("Progress: ", progress)
             const progressDisplay = []
-            for (let gemIndex = 0; gemIndex < progress.total; gemIndex++ ) {
-                log("Loop: ", gemIndex)
+            for (let gemIndex = 0; gemIndex < progress.total; gemIndex++) {
+                //log("Loop: ", gemIndex)
                 if (gemIndex < progress.completed) {
-                    log("Adding completed gem")
-                    progressDisplay.push(<Avatar key={gemIndex} src={amythystXS} sx={{maxWidth:20, maxHeight:25}}/>)
+                    //log("Adding completed gem")
+                    progressDisplay.push(<Avatar key={gemIndex} src={amythystXS} sx={{ maxWidth: 20, maxHeight: 25 }} />)
                 }
                 if (gemIndex >= progress.completed) {
-                    log("Adding incompleted gem")
+                    //log("Adding incompleted gem")
                     progressDisplay.push(<Avatar key={gemIndex} src={spentAmythystXS} sx={{ maxWidth: 20, maxHeight: 25 }} />)
                 }
             }
-            log("total: ", progressDisplay.length)
+            //log("total: ", progressDisplay.length)
             return progressDisplay
         }
-
-
 
         return (
             <Stack direction="row" sx={{ backgroundColor: 'orange' }}>
@@ -141,22 +189,24 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
                                         </>
                                     }
                                     placement="right-end">
-                                    <Button variant="outlined" onClick={() => { doAction(action.actionCode)}}>
-                                        <Stack direction="column">
-                                            <Typography variant="h6">
-                                                {action.name}
-                                            </Typography>
-                                            <Divider />
-                                            <Stack direction="row">
-                                                test
-                                            <DisplayActionProgress progress={action.clock.progress }/>
-                                                
+                                    <span>
+                                        <Button disabled={action.disabled} variant="outlined" onClick={() => { attemptAction(action) }}>
+                                            <Stack direction="column">
+                                                <Typography variant="h6">
+                                                    {action.name}
+                                                </Typography>
+                                                <Divider />
+                                                <Stack direction="row">
+                                                    test
+                                                    <DisplayActionProgress progress={action.clock.progress} />
+
+                                                </Stack>
+                                                <Typography variant="subtitle">
+                                                    {action.description}
+                                                </Typography>
                                             </Stack>
-                                            <Typography variant="subtitle">
-                                                {action.description}
-                                            </Typography>
-                                        </Stack>
-                                    </Button>
+                                        </Button>
+                                    </span>
                                 </Tooltip>
                             </Stack>
                         )
@@ -168,23 +218,40 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
         )
     })
 
+    const EventDisplay = observer(({ resourceHandler, actionHandler }) => {
+        //TODO: something that can display a column of events the player can trigger
+        return (
+            <>
+                Hello World
+            </>
+
+        )
+    })
+
     const DisplayLog = observer(({ resourceHandler, actionHandler }) => {
+        //log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        //log(actionLog)
         return (
 
             <Stack >
                 <Typography >
                     Action Log
                 </Typography>
-                {actionLog.map((logItem, logIndex) => {
-                    return (
-                        <Stack key={logIndex} sx={{ height: 'auto', width: '100%', backgroundColor: 'lightgray' }} >
-                            <Typography>
-                                {logItem}
-                            </Typography>
-                            <Divider />
-                        </Stack>
-                    )
-                })}
+                {actionHandler.actionLog.length > 0 ? (
+                    <>
+                        {actionHandler.actionLog.map((logItem, logIndex) => {
+                            return (
+                                <Stack key={logIndex} sx={{ height: 'auto', width: '100%', backgroundColor: 'lightgray' }} >
+                                    <Typography>
+                                        {logItem}
+                                    </Typography>
+                                    <Divider />
+                                </Stack>
+                            )
+                        })}
+                  </>
+                ): (null) }
+                
             </Stack>
         )
     })
@@ -198,18 +265,52 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
             <div style={{ flex: 1 }}>
                 <Sidebar children={
                     [
+                        
+                        <Button
+                            variant="contained"
+                            id="roll-all"
+                            className="button"
+                            aria-label="Roll Attributes Points"
+                            onClick={rollDice}
+                        >
+                            Roll Dice
+                        </Button>,
                         <ResourceDisplay key={0} resourceHandler={resourceHandler} actionHandler={actionHandler} />,
                         <CharacterInventory key={1} curCharacter={curCharacter} />
-                        
+
                     ]
                 }>
-                    
+
                 </Sidebar>
             </div>
             <Split mode="vertical" style={{ width: '70%' }}>
                 <div style={{ height: '80%' }}>
-                    <CharacterDetails curCharacter={curCharacter} />
-                    <Actions resourceHandler={resourceHandler} actionHandler={actionHandler} test={test} />
+                    <AppBar position="static" color="primary" enableColorOnDark>
+                        <Toolbar>
+                            <IconButton
+                                size="large"
+                                edge="start"
+                                color="inherit"
+                                aria-label="menu"
+                                sx={{ mr: 2 }}
+                                onClick={toggleDrawer(true)}
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                            <Box sx={{ m: 1, p: 1 }}>
+                                <CharacterDetails actionHandler={actionHandler} curCharacter={curCharacter} />
+
+                            </Box>
+                            <Drawer
+                                anchor="top"
+                                open={menuBarOpen}
+                                onClose={toggleDrawer(false)}
+                            >
+                                Hello World - test test test
+                            </Drawer>
+                        </Toolbar>
+                    </AppBar>
+                    <Actions resourceHandler={resourceHandler} actionHandler={actionHandler} attemptAction={attemptAction} />
                 </div>
                 <Split style={{ height: '20%' }}>
                     <div style={{ flex: 1, overflow: 'auto' }}>
@@ -233,7 +334,7 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
                 }>
 
                 </Sidebar>
-               
+
             </div>
 
 

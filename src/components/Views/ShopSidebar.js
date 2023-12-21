@@ -13,7 +13,7 @@ import { log } from '../Debugger';
 export default function ShopSidebar({ curCharacter, shopHandler, curLocation, resourceHandler, actionHandler }) {
     //const [itemCodes, setItemCodes] = useState([])
     //var itemCodes = []
-    let curShop = shopHandler.curShop
+    //let shopHandler.curShop = shopHandler.shopHandler.curShop
     const [disabledStock, setDisabledStock] = useState([])
     const [sortedInventory, setSortedInventory] = useState([])
     const [sortBy, setSortBy] = useState("name")
@@ -21,10 +21,10 @@ export default function ShopSidebar({ curCharacter, shopHandler, curLocation, re
     useEffect(() => {
         //TODO: If filtering is applied to the inventory, it may become desynced from the disabled flags
         autorun(() => {
-            //if (curShop) {
-            if (curShop && curShop.inventory.size > 0) {
+            //if (shopHandler.curShop) {
+            if (shopHandler.curShop && shopHandler.curShop.inventory.size > 0) {
                 //log("disabling stock")
-                let inventory = Array.from(curShop.inventory.entries())
+                let inventory = Array.from(shopHandler.curShop.inventory.entries())
                 let disabled = []
                 //log("Stock changed: ", inventory)
                 inventory.forEach((item, index) => {
@@ -42,9 +42,9 @@ export default function ShopSidebar({ curCharacter, shopHandler, curLocation, re
 
 
     useEffect(() => {
-        if (curShop != undefined) {
-            log("Shop Stock: ", Array.from(curShop.inventory.entries()))
-            //log("quantities: ", Array.from(curShop.inventory.values()))
+        if (shopHandler.curShop != undefined) {
+            log("Shop Stock: ", Array.from(shopHandler.curShop.inventory.entries()))
+            //log("quantities: ", Array.from(shopHandler.curShop.inventory.values()))
         }
     }, [])
 
@@ -65,20 +65,20 @@ export default function ShopSidebar({ curCharacter, shopHandler, curLocation, re
 
     return (
         <Box sx={{ flexGrow: 1, textAlign:"center", pr:5, pl:5}}>
-            {curShop === undefined ? (
+            {shopHandler.curShop === undefined ? (
                 <>
                     No Shop Selected
                 </>
             ) : (
                 <>
                     <Typography variant="h5">
-                        {curShop.name}
+                        {shopHandler.curShop.name}
                         </Typography>
                         <Divider/>
                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }} >
-                        {Array.from(curShop.inventory.keys()).map((code, itemIndex) => {
+                        {Array.from(shopHandler.curShop.inventory.keys()).map((code, itemIndex) => {
                             //log("Mapping item: ", code)
-                            //log("All items: ", Array.from(curShop.inventory.entries()))
+                            //log("All items: ", Array.from(shopHandler.curShop.inventory.entries()))
                             return (
                                 <Grid item xs={2} sm={4} md={4} key={itemIndex}>
                                     <Tooltip>
@@ -94,7 +94,7 @@ export default function ShopSidebar({ curCharacter, shopHandler, curLocation, re
                                                 <Box>
                                                     {Items[code].name}
                                                     <Divider />
-                                                    {curShop.inventory.get(code)}
+                                                    {shopHandler.curShop.inventory.get(code)}
                                                     <Divider />
                                                     Cost:{shopHandler.determinePrice(Items[code])}
                                                 </Box>
@@ -152,14 +152,14 @@ export default function ShopSidebar({ curCharacter, shopHandler, curLocation, re
 //const codes = ["axe", "wlt", "cnp"]
 
     //useEffect(() => {
-    //    if (curShop != undefined) {
-    //        let newItemCodes = Array.from(curShop.inventory.keys())
+    //    if (shopHandler.curShop != undefined) {
+    //        let newItemCodes = Array.from(shopHandler.curShop.inventory.keys())
     //        log("Incoming inventory: ", newItemCodes)
     //        setItemCodes(newItemCodes)
-    //        //curShop.inventory
-    //        //Object.keys(curShop.inventory).forEach(function (key, index) {
+    //        //shopHandler.curShop.inventory
+    //        //Object.keys(shopHandler.curShop.inventory).forEach(function (key, index) {
     //        //    newItems.push(key)
     //        //})
     //        //itemCodes = newItems
     //    }
-    //}, [shopHandler.curShop.inventory])
+    //}, [shopHandler.shopHandler.curShop.inventory])

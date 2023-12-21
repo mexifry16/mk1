@@ -3,9 +3,11 @@ export const villageActions = [
         actionCode: "ptr",
         name: "Punch Tree",
         description: "Ow",
-        tierReq: 0,
+        tierReq: 1,
+        statReq: ["STR"],
         resourceReq: {},
         itemReq: [],
+        visibilityReq: {}, //Define a point at which actions enter into your play area even if you don't actually qualify to do them yet
         cost: {},
         outcomes: { },
         rewards: { wood: 1 },
@@ -18,7 +20,9 @@ export const villageActions = [
         repeats: -1, /* number of times an action can be repeated. -1 for inifinite*/
         removable: false,
         clock: undefined,
-        effect: "limited"
+        effect: "limited",
+        unlocked: false,
+        available: false
 
     },
     {
@@ -26,6 +30,7 @@ export const villageActions = [
         name: "Chop Wood",
         description: "Much easier than doing it by hand",
         tierReq: 1,
+        statReq: ["STR"],
         resourceReq: {},
         itemReq: ["axe"],
         cost: {},
@@ -47,6 +52,7 @@ export const villageActions = [
         name: "Sell Produce",
         description: "At least you get an allowance",
         tierReq: 1,
+        statReq: ["STR"],
         resourceReq: {},
         itemReq: [],
         cost: {},
@@ -62,29 +68,11 @@ export const villageActions = [
         effect: "standard"
     },
     {
-        actionCode: "rst",
-        name: "Rest",
-        description: "Finally time to rest",
-        tierReq: 0,
-        resourceReq: {},
-        itemReq: [],
-        cost: {},
-        outcomes: { rest: 0 },
-        rewards: {},
-        message: "You sleep and dream of gold and glory",
-        progressMessage: "You punch the tree",
-        successMessage: "You manage to punch a log free",
-        critMessage: "You punch clean through the tree in a single blow",
-        repeats: -1, /* number of times an action can be repeated. -1 for inifinite*/
-        removable: false,
-        clock: undefined,
-        effect: "standard"
-    },
-    {
         actionCode: "cbd",
         name: "Cook Bread",
         description: "Delicious!",
         tierReq: 1,
+        statReq: ["STR"],
         resourceReq: {},
         itemReq: [],
         cost: { flour: 2, water: 1, salt: 1 },
@@ -104,6 +92,7 @@ export const villageActions = [
         name: "Tend Crops",
         description: "Your families main source of income. And food.",
         tierReq: 1,
+        statReq: ["STR"],
         resourceReq: {},
         itemReq: [],
         cost: {},
@@ -123,6 +112,7 @@ export const villageActions = [
         name: "Feed Artifact",
         description: "Your families main source of income. And food.",
         tierReq: 2,
+        statReq: ["STR"],
         resourceReq: {},
         itemReq: ["gem"],
         cost: { gold: 5 },

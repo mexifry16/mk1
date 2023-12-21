@@ -49,7 +49,7 @@ export default class ResourceHandler {
     }
 
     get maxWood() {
-        log("getting max wood")
+        //log("getting max wood")
         return this._maxWood
     }
 

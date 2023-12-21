@@ -3,11 +3,10 @@ import { Stack, Button, Typography, Box, Divider } from '@mui/material';
 import { observer } from "mobx-react-lite"
 import About from './SiteComponents/About';
 import Game from './components/Game';
-import Dashboard from './SiteComponents/Dashboard'
-import DiceRoller from './SiteComponents/DiceRoller'
+import Dashboard from './SiteComponents/Dashboard';
 import logo from './logo.svg';
 import './App.css';
-
+import DisplayResults from "@3d-dice/dice-ui/src/displayResults";
 
 export default function App() {
 
@@ -23,7 +22,6 @@ export default function App() {
                     <Route path="about" element={<About />} />
                     <Route path="experiments" element={<Game/> } />
                     <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="dashboard" element={<DiceRoller />} />
 
                     {/* Using path="*"" means "match anything", so this route
                 acts like a catch-all for URLs that we don't have explicit

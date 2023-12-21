@@ -20,7 +20,7 @@ export default class ShopHandler {
         if (characterHandler != undefined)
             this._curCharacter = characterHandler
 
-        makeAutoObservable(this)
+        makeAutoObservable(this, {}, { autoBind: true })
     }
 
     get curShop() {

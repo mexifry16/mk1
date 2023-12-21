@@ -3,6 +3,7 @@ import { keyExists } from '../../Helpers/JSONHelpers';
 import { Items } from '../../Data/Items';
 import { log } from '../Debugger';
 import { JSONCheatCopy } from '../../Helpers/JSONHelpers';
+import ATTRIBUTE from '../../Enums/AttributeEnum';
 
 
 export default class {
@@ -40,14 +41,13 @@ export default class {
         this._status = ["well"]
         this._equipped = new Map([["head", null], ["chest", null], ["weapon", null]])
         this._fate = 0
-        this._LCK = 0
-        this._STR = 1
-        this._DEX = 1
-        this._CON = 1
-        this._INT = 1
-        this._WIS = 1
-        this._CHA = 1
-        this._LCK = 1
+        this._STR = 10
+        this._DEX = 10
+        this._CON = 10
+        this._INT = 10
+        this._WIS = 10
+        this._CHA = 10
+        this._LCK = 10
         this.class = 'Peasant'
 
         //TODO SHOULD BE keyExistsAndHasValue()
@@ -65,7 +65,8 @@ export default class {
             Object.keys(args).forEach((key) => {
                 this[`_${key}`] = args[key];
             });
-        makeAutoObservable(this)
+        makeAutoObservable(this, {}, { autoBind: true })
+        //makeAutoObservable(this)
     }
 
     get name() {
@@ -103,6 +104,12 @@ export default class {
 
     get curAP() {
         return this._curAP
+    }
+
+    set curAP(newAP) {
+        this._curAP = (newAP ?? this._curAP)
+        if (this._curAP < 0)
+            this._curAP = 0
     }
 
     rest(quantity) {
@@ -241,6 +248,84 @@ export default class {
         let removeIndex = this._status.indexOf(statusCode)
         if (removeIndex >= 0)
             this._status.splice(removeIndex, 1)
+    }
+
+    getHighestMod(stats) {
+        log("Stats: ", stats)
+        let highestStat = undefined
+        let highestMod = -4
+        stats.forEach((stat) => {
+            let checkMe = this.getAttrModifier(stat)
+            log(`${stat} is ${checkMe}`)
+            if (checkMe > highestMod) {
+                highestStat = stat
+                highestMod = checkMe
+            }
+        })
+        return { attr: highestStat, mod: highestStat === undefined ? undefined : highestMod }
+    }
+
+    getAttrModifier(stat) {
+        let attribute = undefined
+        switch (stat) {
+            case ATTRIBUTE.STRENGTH:
+                attribute = this.STR
+                break
+            case ATTRIBUTE.DEXTERITY:
+                attribute = this.DEX
+                break
+            case ATTRIBUTE.CONSTITUTION:
+                attribute = this.CON
+                break
+            case ATTRIBUTE.WIDSOM:
+                attribute = this.WIS
+                break
+            case ATTRIBUTE.INTELLIGENCE:
+                attribute = this.INT
+                break
+            case ATTRIBUTE.CHARISMA:
+                attribute = this.CHA
+                break
+            case ATTRIBUTE.LUCK:
+                attribute = this.LCK
+                break
+            default:
+                log("Undefined attribute when getting modifier")
+                attribute = undefined
+        }
+
+        return this.getModifier(attribute)
+    }
+
+    getModifier(stat) {
+        let modifier = 0
+        switch (true) {
+            case stat >= 18:
+                modifier = 3
+                break
+            case stat >= 16 && stat < 18:
+                modifier = 2
+                break
+            case stat >= 13 && stat < 15:
+                modifier = 1
+                break
+            case stat >= 9 && stat < 13:
+                modifier = 0
+                break
+            case stat >= 6 && stat < 9:
+                modifier = -1
+                break
+            case stat >= 4 && stat < 6:
+                modifier = -2
+                break
+            case stat >= 1 && stat < 4:
+                modifier = -3
+                break
+            default:
+                log("Stat less than 1 when getting modifier")
+                modifier = 0
+        }
+        return modifier
     }
 
     //TODO Think about more interesting methods of combat

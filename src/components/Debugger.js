@@ -11,7 +11,7 @@ const SPY_ENABLED = false //Enables the mobx spy to run. Customize the effect fo
 //Enable specific object auto prints
 const LOGGING_ALL = false
 const LOGGING_CHARACTER = false
-const LOGGING_ACTION_HANDLER = true
+const LOGGING_ACTION_HANDLER = false
 const LOGGING_RESOURCES = true
 const LOGGING_SHOP = false
 const LOGGING_SHOP_HANDLER = false
@@ -104,6 +104,13 @@ export const Debugger = observer(({ resourceHandler, actionHandler, curCharacter
             })
         }
     }, [])
+
+    //autorun(() => {
+    //    console.log("Current Action changed: ", JSON.stringify(actionHandler.curAction)) // also reads the entire structure.
+    //})
+    autorun(() => {
+        console.log("Current AP: ", JSON.stringify(curCharacter.curAP)) // also reads the entire structure.
+    })
       
     return (<>{children}</>)
 })
