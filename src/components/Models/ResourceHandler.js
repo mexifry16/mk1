@@ -2,7 +2,6 @@ import { makeAutoObservable, trace } from "mobx"
 import { log } from '../Debugger';
 
 export default class ResourceHandler {
-    _wood 
 
     constructor(args) {
         this._coins = 0
