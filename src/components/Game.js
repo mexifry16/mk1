@@ -56,7 +56,12 @@ import { Debugger, log, LOGGING_ENABLED, DEBUGGING_ENABLED } from './Debugger'
 })
 
 export default function Game() {
-   
+
+    //Must be created before the action handler
+    //TODO: this file should hold the logic that bings the handlers together rather than any of the handlers seeing each other
+    const rollDice = (notatedDice)=>{
+        diceJar.show().roll(notatedDice);
+    }
 
      //TODO: ADD A MASTER DISABLE FLAG FOR ANYTHING THAT MIGHT NEED TO WAIT (ROLLING DICE NEEDS TO WAIT FOR LOADING ASSETS AND TO WAIT FOR EXISTING DICE TO FINISH ROLLING)
     //Set up resource stores 
@@ -69,12 +74,44 @@ export default function Game() {
     const [curLocation, setCurLocation] = useState("Village")
     const [gameDate, setGameDate] = useState(0)
     
-    const boundResolve = actionHandler.resolveRoll.bind(actionHandler)
-
     useEffect(() => {
         shopHandler.setCurShop("htg")
     }, [])
 
+        /******************************************************
+     * DICE HANDLERS
+     ******************************************************/
+
+        diceJar.onRollComplete = (results) => {
+            //TODO: Handle other reasons to roll the dice here
+    
+            let message = `You rolled ${results[0].rolls.length}d6 and got ${results[0].value}`
+            log(message)
+            let modifiers = { total: 0 }
+            let highAttr = undefined
+            let action = actionHandler.curAction
+            let outcome = undefined
+    
+            if (action != undefined) {
+                message = `There was an error attempting ${action.name}`
+                highAttr = curCharacter.getHighestMod(action.statReq)
+                modifiers[highAttr.attr] = highAttr.mod
+                modifiers.total += highAttr.mod
+    
+                let diceResults = readRoll(results, modifiers)
+                log("Dice results: ", diceResults)
+    
+                let outcome = diceResults.outcome
+                let position = GAMEHELPERS.determinePosition(action, curCharacter)
+                let effect = GAMEHELPERS.determineEffect(action)
+                outcome = boundResolve(results, effect, outcome)
+                //addActionLog(outcome)
+                //TODO: Process the outcome. display some messages
+    
+            }
+            //log("Dice Results: ", results);
+            //log("Outcome: ", outcome)
+        };
 
     /******************************************************
      * Game Logic
@@ -110,6 +147,8 @@ export default function Game() {
     /******************************************************
      * DATA BINDING AND DEBUGGING
      ******************************************************/
+
+    const boundResolve = actionHandler.resolveRoll.bind(actionHandler)
 
     //Bind resource stores to main component via an observer (mobx)
     const GameView = observer(({ resourceHandler, actionHandler, curCharacter, shopHandler }) => {
@@ -152,48 +191,6 @@ export default function Game() {
         }
         return view
     })
-
-    /******************************************************
-     * DICE HANDLERS
-     ******************************************************/
-
-    const rollDice = (notatedDice)=>{
-        diceJar.show().roll(notatedDice);
-    }
-    // function rollDice (notatedDice){
-        
-    // }
-
-    diceJar.onRollComplete = (results) => {
-        //TODO: Handle other reasons to roll the dice here
-
-        let message = `You rolled ${results[0].rolls.length}d6 and got ${results[0].value}`
-        log(message)
-        let modifiers = { total: 0 }
-        let highAttr = undefined
-        let action = actionHandler.curAction
-        let outcome = undefined
-
-        if (action != undefined) {
-            message = `There was an error attempting ${action.name}`
-            highAttr = curCharacter.getHighestMod(action.statReq)
-            modifiers[highAttr.attr] = highAttr.mod
-            modifiers.total += highAttr.mod
-
-            let diceResults = readRoll(results, modifiers)
-            log("Dice results: ", diceResults)
-
-            let outcome = diceResults.outcome
-            let position = GAMEHELPERS.determinePosition(action, curCharacter)
-            let effect = GAMEHELPERS.determineEffect(action)
-            outcome = boundResolve(results, effect, outcome)
-            //addActionLog(outcome)
-            //TODO: Process the outcome. display some messages
-
-        }
-        //log("Dice Results: ", results);
-        //log("Outcome: ", outcome)
-    };
 
     /******************************************************
      * RENDER
