@@ -16,18 +16,29 @@ import MainScreen from './MainScreen';
 import { Debugger, log, LOGGING_ENABLED, DEBUGGING_ENABLED } from './Debugger'
 
 
-
+ /**
+     * Primary library for rendering traditional js classes reactively
+     * https://mobx.js.org/README.html 
+     * */
 
 export default function Game() {
+     //TODO: ADD A MASTER DISABLE FLAG FOR ANYTHING THAT MIGHT NEED TO WAIT (ROLLING DICE NEEDS TO WAIT FOR LOADING ASSETS AND TO WAIT FOR EXISTING DICE TO FINISH ROLLING)
+    //Set up resource stores 
+    const resourceHandler = new ResourceHandler()
+    const curCharacter = new Character({ name: "Billy Wigglestick" })
+    const actionHandler = new ActionHandler({ "curResources": resourceHandler, "curCharacter": curCharacter, rollDice: rollDice })
+    const shopHandler = new ShopHandler(resourceHandler, curCharacter)
+    const [diceRolling, setDiceRolling] = useState(false)
+    const boundResolve = actionHandler.resolveRoll.bind(actionHandler)
+    const [curLocation, setCurLocation] = useState("Village")
 
-    //configure({
-    //    enforceActions: "always",
-    //    computedRequiresReaction: true,
-    //    reactionRequiresObservable: true,
-    //    observableRequiresReaction: true,
-    //    disableErrorBoundaries: true
-    //})
+    useEffect(() => {
+        shopHandler.setCurShop("htg")
+    }, [])
 
+    /******************************************************
+     * Dice Initializers
+     ******************************************************/
     const [Dice] = useState(
         new DiceBox(
             "#dice-box", // target DOM element to inject the canvas for rendering
@@ -42,7 +53,6 @@ export default function Game() {
             }
         )
     )
-
 
     document.addEventListener("DOMContentLoaded", async () => {
         //log("***********************************************************************************************")
@@ -63,21 +73,10 @@ export default function Game() {
         });
     })
 
-    /**
-     * Primary library for rendering traditional js classes reactively
-     * https://mobx.js.org/README.html 
-     * */
 
-    //TODO: ADD A MASTER DISABLE FLAG FOR ANYTHING THAT MIGHT NEED TO WAIT (ROLLING DICE NEEDS TO WAIT FOR LOADING ASSETS AND TO WAIT FOR EXISTING DICE TO FINISH ROLLING)
-    //Set up resource stores 
-    const resourceHandler = new ResourceHandler()
-    const curCharacter = new Character({ name: "Billy Wigglestick" })
-    const actionHandler = new ActionHandler({ "curResources": resourceHandler, "curCharacter": curCharacter, rollDice: rollDice })
-    const shopHandler = new ShopHandler(resourceHandler, curCharacter)
-    const [diceRolling, setDiceRolling] = useState(false)
-    const boundResolve = actionHandler.resolveRoll.bind(actionHandler)
-    //const [actionLog, setActionLog] = useState([])
-
+    /******************************************************
+     * Game Logic
+     ******************************************************/
     //async function addActionLog(message) {
     //    let newLog = [...actionLog]
     //    //The outcomes returned by resolve roll are promises. This seems like the only place to wait for the to resolve or I end up with an array of promises instead of messages for the action log
@@ -136,43 +135,9 @@ export default function Game() {
         //log("Outcome: ", outcome)
     };
 
-
-    //function onRollComplete
-
-    //const rollDice = (notation, ) => {
-    //    //curAction = actionCode
-    //    //log("curaction: ", curAction)
-    //};
-
-    //autorun(() => {
-    //    if (actionHandler.curAction != undefined) {
-    //        log("Current action in game:", actionHandler.curAction)
-
-    //        Dice.onRollComplete = (results) => {
-    //            //Give results to actionHandler
-    //            //TODO: if we ever roll dice for another reason it'll get processed like an action and break things
-    //            //let boundResolve = actionHandler.resolveRoll.bind(actionHandler)
-    //            let outcome = actionHandler.resolveRoll(results)
-    //            //let outcome = boundResolve(results)
-    //            //log("Dice Results: ", results);
-    //        };
-    //    }
-    //})
-
-    // This method is triggered whenever dice are finished rolling
-    //Dice.onRollComplete = (results) => {
-        //Give results to actionHandler
-        //TODO: if we ever roll dice for another reason it'll get processed like an action and break things
-        //let boundResolve = actionHandler.resolveRoll.bind(actionHandler)
-        //log("Current action in game:", curAction)
-      //  let outcome = actionHandler.resolveRoll(results)
-        //let outcome = boundResolve(results)
-        //log("Dice Results: ", results);
-    //};
-
-    //Dice.onRollComplete = (results) => {
-    //    let outcome = actionHandler.resolveRoll(results)
-    //};
+    /******************************************************
+     * DATA BINDING AND DEBUGGING
+     ******************************************************/
 
     //Bind resource stores to main component via an observer (mobx)
     const GameView = observer(({ resourceHandler, actionHandler, curCharacter, shopHandler }) => {
@@ -213,36 +178,12 @@ export default function Game() {
                 //actionLog={actionLog}
             />
         }
-
-
         return view
     })
 
-    useEffect(() => {
-        shopHandler.setCurShop("htg")
-    }, [])
-
-
-
-    autorun(() => {
-        log("Resource Handler: ", JSON.stringify(resourceHandler)) // Also reads the entire structure.
-        //console.log("Resource Handler: ", JSON.stringify(resourceHandler)) // Also reads the entire structure.
-        
-    })
-
-
-    //Game State data
-    const [curLocation, setCurLocation] = useState("Village")
-    //const [curShop, setCurShop] = useState(null)
-
-
-    /**
-     * Action Processing
-     */
-    
-    /**
-     * render
-     * */
+    /******************************************************
+     * RENDER
+     ******************************************************/
     return (
         <>
             <GameView
