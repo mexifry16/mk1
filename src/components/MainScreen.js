@@ -7,9 +7,9 @@ import Split from '@uiw/react-split'
 import SplitPane, { Pane } from 'split-pane-react';
 import MenuIcon from '@mui/icons-material/Menu';
 import Sidebar from './UI/Sidebar';
-import ShopSidebar from './Views/ShopSidebar';
-import { ResourceDisplay } from './Views/ResourceDisplay';
-import { CharacterInventory } from './Views/CharacterInventory';
+import ShopSidebar from './views/ShopSidebar';
+import { ResourceDisplay } from './views/ResourceDisplay';
+import { CharacterInventory } from './views/CharacterInventory';
 import ruby from '../Assets/ruby.png';
 import spentRuby from '../Assets/spentRuby.png';
 import amythystXS from '../Assets/amythystXS.png';
