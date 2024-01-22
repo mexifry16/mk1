@@ -15,68 +15,74 @@ import { GAMEHELPERS } from '../Helpers/GameHelpers';
 import MainScreen from './MainScreen';
 import { Debugger, log, LOGGING_ENABLED, DEBUGGING_ENABLED } from './Debugger'
 
+/*
+* Primary library for rendering traditional js classes reactively
+* https://mobx.js.org/README.html 
+* */
 
- /**
-     * Primary library for rendering traditional js classes reactively
-     * https://mobx.js.org/README.html 
-     * */
+/******************************************************
+ * Dice Initializers
+ ******************************************************/
+
+ const diceJar = 
+ new DiceBox(
+     "#dice-box", // target DOM element to inject the canvas for rendering
+     {
+         id: "dice-canvas", // canvas element id
+         assetPath: process.env.PUBLIC_URL + "/assets/dice-box/",
+         startingHeight: 8,
+         throwForce: 6,
+         spinForce: 5,
+         lightIntensity: 0.9,
+         theme: "default"
+     }
+ )
+
+ document.addEventListener("DOMContentLoaded", async () => {
+    //log("********************************************")
+    //log("Asset Path:")
+    //log(Dice.assetPath)
+    diceJar.init().then(() => {
+        // clear dice on click anywhere on the screen
+        document.addEventListener("mousedown", () => {
+            const diceBoxCanvas = document.getElementById("dice-canvas");
+            if (window.getComputedStyle(diceBoxCanvas).display !== "none") {
+                diceJar.hide()
+                //Dice.clear()
+                //DiceResults.clear();
+            }
+        });
+    });
+})
 
 export default function Game() {
+   
+
      //TODO: ADD A MASTER DISABLE FLAG FOR ANYTHING THAT MIGHT NEED TO WAIT (ROLLING DICE NEEDS TO WAIT FOR LOADING ASSETS AND TO WAIT FOR EXISTING DICE TO FINISH ROLLING)
     //Set up resource stores 
     const resourceHandler = new ResourceHandler()
     const curCharacter = new Character({ name: "Billy Wigglestick" })
     const actionHandler = new ActionHandler({ "curResources": resourceHandler, "curCharacter": curCharacter, rollDice: rollDice })
     const shopHandler = new ShopHandler(resourceHandler, curCharacter)
+    
     const [diceRolling, setDiceRolling] = useState(false)
-    const boundResolve = actionHandler.resolveRoll.bind(actionHandler)
     const [curLocation, setCurLocation] = useState("Village")
+    const [gameDate, setGameDate] = useState(0)
+    
+    const boundResolve = actionHandler.resolveRoll.bind(actionHandler)
 
     useEffect(() => {
         shopHandler.setCurShop("htg")
     }, [])
 
-    /******************************************************
-     * Dice Initializers
-     ******************************************************/
-    const [Dice] = useState(
-        new DiceBox(
-            "#dice-box", // target DOM element to inject the canvas for rendering
-            {
-                id: "dice-canvas", // canvas element id
-                assetPath: process.env.PUBLIC_URL + "/assets/dice-box/",
-                startingHeight: 8,
-                throwForce: 6,
-                spinForce: 5,
-                lightIntensity: 0.9,
-                theme: "default"
-            }
-        )
-    )
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        //log("***********************************************************************************************")
-        //log("Asset Path:")
-        //log(Dice.assetPath)
-        Dice.init().then(() => {
-
-
-            // clear dice on click anywhere on the screen
-            document.addEventListener("mousedown", () => {
-                const diceBoxCanvas = document.getElementById("dice-canvas");
-                if (window.getComputedStyle(diceBoxCanvas).display !== "none") {
-                    Dice.hide()
-                    //Dice.clear()
-                    //DiceResults.clear();
-                }
-            });
-        });
-    })
-
 
     /******************************************************
      * Game Logic
      ******************************************************/
+
+    function initGame(){
+
+    }
     //async function addActionLog(message) {
     //    let newLog = [...actionLog]
     //    //The outcomes returned by resolve roll are promises. This seems like the only place to wait for the to resolve or I end up with an array of promises instead of messages for the action log
@@ -88,9 +94,7 @@ export default function Game() {
     //    setActionLog(newLog)
     //}
 
-    function rollDice(notatedDice) {
-        Dice.show().roll(notatedDice);
-    }
+  
 
     function attemptAction(action) {
         actionHandler.curAction = action
@@ -102,38 +106,6 @@ export default function Game() {
         curCharacter.curAP = curCharacter.curAP - action.tierReq
         actionHandler.refreshActions()
     }
-
-
-    Dice.onRollComplete = (results) => {
-        //TODO: Handle other reasons to roll the dice here
-
-        let message = `You rolled ${results[0].rolls.length}d6 and got ${results[0].value}`
-        log(message)
-        let modifiers = { total: 0 }
-        let highAttr = undefined
-        let action = actionHandler.curAction
-        let outcome = undefined
-
-        if (action != undefined) {
-            message = `There was an error attempting ${action.name}`
-            highAttr = curCharacter.getHighestMod(action.statReq)
-            modifiers[highAttr.attr] = highAttr.mod
-            modifiers.total += highAttr.mod
-
-            let diceResults = readRoll(results, modifiers)
-            log("Dice results: ", diceResults)
-
-            let outcome = diceResults.outcome
-            let position = GAMEHELPERS.determinePosition(action, curCharacter)
-            let effect = GAMEHELPERS.determineEffect(action)
-            outcome = boundResolve(results, effect, outcome)
-            //addActionLog(outcome)
-            //TODO: Process the outcome. display some messages
-
-        }
-        //log("Dice Results: ", results);
-        //log("Outcome: ", outcome)
-    };
 
     /******************************************************
      * DATA BINDING AND DEBUGGING
@@ -180,6 +152,48 @@ export default function Game() {
         }
         return view
     })
+
+    /******************************************************
+     * DICE HANDLERS
+     ******************************************************/
+
+    const rollDice = (notatedDice)=>{
+        diceJar.show().roll(notatedDice);
+    }
+    // function rollDice (notatedDice){
+        
+    // }
+
+    diceJar.onRollComplete = (results) => {
+        //TODO: Handle other reasons to roll the dice here
+
+        let message = `You rolled ${results[0].rolls.length}d6 and got ${results[0].value}`
+        log(message)
+        let modifiers = { total: 0 }
+        let highAttr = undefined
+        let action = actionHandler.curAction
+        let outcome = undefined
+
+        if (action != undefined) {
+            message = `There was an error attempting ${action.name}`
+            highAttr = curCharacter.getHighestMod(action.statReq)
+            modifiers[highAttr.attr] = highAttr.mod
+            modifiers.total += highAttr.mod
+
+            let diceResults = readRoll(results, modifiers)
+            log("Dice results: ", diceResults)
+
+            let outcome = diceResults.outcome
+            let position = GAMEHELPERS.determinePosition(action, curCharacter)
+            let effect = GAMEHELPERS.determineEffect(action)
+            outcome = boundResolve(results, effect, outcome)
+            //addActionLog(outcome)
+            //TODO: Process the outcome. display some messages
+
+        }
+        //log("Dice Results: ", results);
+        //log("Outcome: ", outcome)
+    };
 
     /******************************************************
      * RENDER
