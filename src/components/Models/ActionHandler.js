@@ -27,12 +27,8 @@ export default class ActionHandler {
             itemReq: [],
             resourceReq: {}
         }
-        //this._curCharacter = new Character()  
-
-        //this._curResources = { gold: 7, wood: 7 } //new Resources()
-        this._curResources = new ResourceHandler()
         this._curCharacter = new Character()
-        this._rollDice = undefined
+        this._processRewards = undefined
 
         if (args)
             Object.keys(args).forEach((key) => {
@@ -59,15 +55,6 @@ export default class ActionHandler {
 
     get previewActions() {
         return this._previewList
-    }
-
-    set resources(newResources) {
-        this._curResources = newResources
-        this.refreshActions()
-    }
-
-    get resources() {
-        return this._curResources
     }
 
     set curAction(actionCode) {
@@ -101,16 +88,6 @@ export default class ActionHandler {
      * DICE ROLL HELPERS
      */
 
-    
-
-    //boundResolve = (results) => {
-    //    this.resolveRoll.bind(this)
-    //}
-
-    //boundResolve(results){
-    //    return this.resolveRoll.bind(this)
-    //}
-
     determinePosition(action) {
         let position = POSITIONS.CONTROLLED
         if (action.repeats == 0)
@@ -135,7 +112,7 @@ export default class ActionHandler {
      */
 
     /**
-    * Takes in an action object and spits out constructor params for clocks
+    * Takes in an action object and spits out constructor params for a corresponding clock
     * Adjustments to clock settings should happen here. Maybe move anything that might be interesting gamewide to a project settings file
     * @param {any} object
     */
@@ -162,10 +139,10 @@ export default class ActionHandler {
     resolveClock(clockCode) {
         let action = this.actions.find((searchAction) => { return (searchAction.actionCode === clockCode) })
 
-        this.processRewards(action.rewards)
+        this._processRewards(action.rewards)
         if (action.clock.crit === true) {
             //process unique effects?
-            this.processRewards(action.rewards)
+            //this._processRewards(action.rewards)
         }
         action.repeats--
         if (action.repeats === 0) {
@@ -206,7 +183,7 @@ export default class ActionHandler {
                 segments = 0
                 break
             case OUTCOMES.CRITFAIL:
-                segments = 0
+                segments = -2
                 break
             default:
 
@@ -221,42 +198,13 @@ export default class ActionHandler {
 
 
     async resolveRoll(results, effect, outcome) {
-        //let action = this.curAction
-        //let action = this.actions.find((searchAction) => { return (searchAction.actionCode === this.curAction) })
-        let action = this.curAction
-        //console.log(action)
-        //console.log("******************")
-        //console.log(this.curAction)
-
-        //log("Action tier: ", action.tierReq)
-        //let newAP = this._curCharacter.curAP - action.tierReq
-        //this._curCharacter.curAP = newAP
-        //log("Remaining AP: ", newAP)
-
-        //console.log("roll results: ", results)
-        //log("Action: ", action)
+        //log("Action: ", this.curAction)
         let message = `You rolled ${results[0].rolls.length}d6 and got ${results[0].value}`
-        //log(`You rolled ${results[0].rolls.length}d6 and got ${results[0].value}`)
-        //let modifiers = { total: 0 }
 
-        if (action != undefined) {
-            log("Resolving action roll")
-            //this._curCharacter.
-            //action.statReq.forEach
-            //let highAttr = this._curCharacter.getHighestMod(action.statReq)
-            //modifiers[highAttr.attr] = highAttr.mod
-            //modifiers.total += highAttr.mod
-            //modifiers = this._curCharacter.getStatModifier(action.stat)
-            //let diceResults = readRoll(results, modifiers)
-            //message = `There was an error attempting ${action.name}`
-            //log("Dice results: ", diceResults)
-            //let result = rollDice()
-            //let outcome = diceResults.outcome
-            //let position = this.determinePosition(action)
-            //let effect = this.determineEffect(action)
-
-            log("Outcome: ", outcome)
-            let clock = action.clock
+        if (this.curAction != undefined) {
+            //log("Resolving action roll")
+            //log("Outcome: ", outcome)
+            let clock = this.curAction.clock
             let progress = this.determineProgress(effect, outcome)
             //parse results
             switch (outcome) {
@@ -266,37 +214,37 @@ export default class ActionHandler {
                     clock.crit = true
                     clock.increment(progress)
                     message = "Critical Success! "
-                    if (action.critMessage)
-                        message += action.critMessage
+                    if (this.curAction.critMessage)
+                        message += this.curAction.critMessage
                     break
                 case OUTCOMES.SUCCESS:
                     clock.increment(progress)
                     message = "Success! "
-                    if (action.successMessage)
-                        message += action.successMessage
+                    if (this.curAction.successMessage)
+                        message += this.curAction.successMessage
                     break
                 case OUTCOMES.PARTIAL_SUCCESS:
                     clock.increment(progress)
                     //TODO: Process partial success
                     message = "Partial Success. "
-                    if (action.partialMessage)
-                        message += action.partialMessage
+                    if (this.curAction.partialMessage)
+                        message += this.curAction.partialMessage
                     break
                 case OUTCOMES.FAILURE:
                     //TODO" Process failure
-                    message = `You failed to make meaningful progress while attempting to ${action.name}`
-                    if (action.failMessage)
-                        message = action.failMessage
+                    message = `You failed to make meaningful progress while attempting to ${this.curAction.name}`
+                    if (this.curAction.failMessage)
+                        message = this.curAction.failMessage
                     //Nothing BUT
                     break
                 case OUTCOMES.CRITFAIL:
                     //TODO: Process crit failure
-                    message = `You failed spectacularly while attempting to ${action.name}`
-                    if (action.critfailMessage)
-                        message = action.critfailMessage
+                    message = `You failed spectacularly while attempting to ${this.curAction.name}`
+                    if (this.curAction.critfailMessage)
+                        message = this.curAction.critfailMessage
                     break
                 default:
-                    log(`Unrecognized result while attempting ${action.name}`)
+                    log(`Unrecognized result while attempting ${this.curAction.name}`)
 
             }
         }
@@ -306,90 +254,12 @@ export default class ActionHandler {
         this.addActionLog(message)
     }
 
-    //const rollDice = (notation, ) => {
-    //    Dice.show().roll(notation);
-    //    //curAction = actionCode
-    //    //log("curaction: ", curAction)
-    //};
-
-    //rollDice(notation) {
-    //    Dice.show().roll(notation);
-    //    //let outcome = Dice.onRollComplete((results) => {return this.resolveRoll(results) })
-    //}
-
-    //prepAction(actionCode) {
-
-    //}
-
-    //resolveAction(actionCode) {
-
-    //}
-
-    //attemptAction(actionCode) {
-    //    //reduce AP
-
-
-
-    //    let action = this._actionList.find((searchAction) => { return (searchAction.actionCode === actionCode) })
-    //    let message = `There was an error attempting ${action.name}`
-    //    //let outcome = {}
-    //    log(`Attempting ${action.name}`)
-    //    if (action != undefined) {
-
-    //        this._curAction = action.actionCode
-    //        //this.curAction = action.actionCode
-    //        log("Current Action: ", this.curAction)
-    //        log("Current AP: ", this._curCharacter.curAP)
-    //        log("Action tier: ", action.tierReq)
-    //        let newAP = this._curCharacter.curAP - action.tierReq
-    //        this._curCharacter.curAP = newAP
-    //        log("Remaining AP: ", newAP)
-    //        this.rollDice(["2d6"], action.actionCode)
-
-    //        //Otherwise we lose context of "this" when we pass resolveRoll() to this dice callback
-    //        let boundResolve = this.resolveRoll.bind(this)
-
-    //        Dice.onRollComplete = (results) => {
-    //            boundResolve(results)
-    //        }
-
-            
-    //    }
-    //    this.refreshActions()
-    //    if (action === undefined) {
-    //        log("Action cannot be found")
-    //    }
-    //    //outcome.message = message
-    //    return message
-    //}
 
     rest() {
         //Other stuff that happens during rests goes here (e.g. advancing  clocks)
         this._curCharacter.rest()
         this.refreshActions()
 
-    }
-
-    processRewards(rewards, multiplier) {
-        //log("rewards: ", JSON.stringify(rewards))
-        log(`multiplier: ${multiplier}`)
-        for (const [resource, value] of Object.entries(rewards)) {
-            log(`resource:${resource}, value:${value}}`)
-            let newResource = value * (multiplier ?? 1)
-            switch (resource) {
-                case "wood":
-                    log("adding wood")
-                    this._curResources.addWood(newResource)
-                    break;
-                case "coin":
-                    log("adding coins")
-                    this._curResources.addCoins(newResource)
-                    break;
-                default:
-                    log("Resource Not Accounted For : ", resource)
-            }
-            //addActionLog(results.message)
-        }
     }
 
     addActionLog(message) {
@@ -466,14 +336,14 @@ export default class ActionHandler {
         
 
         //Check resources
-        if (available && action.resourceReq.length > 0) {
-            //log("Checking resources")
-            for (const [resourceName, requirement] of Object.entries(action.resourceReqs)) {
-                if (this._curResources[resourceName] < requirement) {
-                    available = false
-                }
-            }
-        }
+        // if (available && action.resourceReq.length > 0) {
+        //     //log("Checking resources")
+        //     for (const [resourceName, requirement] of Object.entries(action.resourceReqs)) {
+        //         if (this._curResources[resourceName] < requirement) {
+        //             available = false
+        //         }
+        //     }
+        // }
 
         //Check Items
         if (available && action.itemReq.length > 0) {
@@ -533,153 +403,3 @@ export default class ActionHandler {
     }
 
 }
-
-//const actionHandler = new ActionHandler()
-
-//export default actionHandler
-
-
-//addActionClock(actionIndex) {
-//    let action = this._actionList[actionIndex]
-
-//    let clock = new Clock({
-//        "name": action.name,
-//        "segments": action.tierReq + 3,
-//        "repeatable": action.repeats < 0 ? true : false,
-//        //"effects: parseEffects(), //TODO: Parse effects into a displayable string
-//        //"resolve": this.doAction
-//    })
-
-//    this._actionClocks.push(clock)
-//    log(`Clock ${clock.name} added`)
-
-//}
-
-
-//refreshActionsOLD() {
-//    //Get all area actions
-//    //Compare against existing actions
-//    //Filter by eligibility
-//    //COPY each eligible object
-//    //Attach a clock
-
-//    log("refreshing actions")
-//    let refreshedActions = this.getActionsByLocation(this._curLocation)
-//    refreshedActions = this.filterActionsByCharacter(this._curCharacter, refreshedActions)
-
-//    //Check unavailable actions
-//    //refreshedList.concat(refreshUnavailableActions())
-//    this._actionList = refreshedActions
-//    //refresh clocks
-//    //this._actionList.forEach((action) => {
-//    //    let match = this.getClockByName(action.name)
-//    //    if (match) {
-//    //        //do nothing
-//    //        log("match found")
-//    //    }
-//    //    if (!match) {
-//    //        //create clock
-//    //    }
-//    //})
-//}
-
-
-////obsolete
-//doAction(actionIndex) {
-//    //TODO: spin out resting into its own thing. Not an action.
-//    log("Doing Action (Action Handler)")
-//    let action = this._actionList[actionIndex]
-//    let message = "You do not have enough AP to do that action"
-//    let skipSwitch = false
-
-//    //Handle resting here so we don't spend AP
-//    if ("rest" in action.outcomes) {
-//        this._curCharacter.rest()
-//        message = action.message
-//        log(action.message)
-//        skipSwitch = true
-//    }
-
-//    if (this._curCharacter.curAP > 0 && !skipSwitch) {
-//        log("You have enough AP")
-//        let result = rollDice()
-
-//        //parse results
-//        switch (result) {
-//            case OUTCOME.CRITICAL_SUCCESS:
-//                //double clock?
-//                //other rewards?
-//                break
-//            case OUTCOME.SUCCESS:
-//                //you get clock
-//                //let clock = this.getClockByName(action.name)
-//                //let results = availbleActions[actionIndex]
-//                for (const [resource, value] of Object.entries(action.effect)) {
-//                    switch (resource) {
-//                        case "wood":
-//                            log("adding wood")
-//                            this._curResources.addWood(value)
-//                            break;
-//                        case "coin":
-//                            log("adding coins")
-//                            this._curResources.addCoins(value)
-//                            break;
-//                        default:
-//                            log("Resource Not Accounted For : ", resource)
-//                    }
-//                    //addActionLog(results.message)
-//                }
-//                message = action.message
-//                break
-//            case OUTCOME.PARTIAL_SUCCESS:
-//                //you get clock BUT (change of "BUT" increases by tier)
-//                break
-//            case OUTCOME.FAILURE:
-//                //Nothing BUT
-//                break
-//            default:
-//                //THIS IS THEORETICALLY IMPOSSIBLE
-//                break
-
-
-//        }
-
-
-//        log(message)
-//        this._curCharacter._curAP = this._curCharacter.curAP - 1
-//    }
-
-//    return (message)
-//}
-
-///**
-// * 
-// * @param {any} actionIndex
-// */
-//resolveAction(actionIndex) {
-//    //TODO: Make it take the actionCode instead of the index
-//    log("Resolving Action Clock")
-//    let action = this._actionList[actionIndex]
-//    let message = "You do not have enough AP to do that action"
-//    let skipSwitch = false
-
-//    for (const [resource, value] of Object.entries(action.effect)) {
-//        switch (resource) {
-//            case "wood":
-//                log("adding wood")
-//                this._curResources.addWood(value)
-//                break;
-//            case "coin":
-//                log("adding coins")
-//                this._curResources.addCoins(value)
-//                break;
-//            default:
-//                log("Resource Not Accounted For : ", resource)
-//        }
-//    }
-//    message = action.message
-//    log(message)
-//    this._curCharacter._curAP = this._curCharacter.curAP - 1
-
-//    return (message)
-//}

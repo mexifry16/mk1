@@ -13,6 +13,7 @@ import ResourceHandler from './Models/ResourceHandler';
 import ShopHandler from './Models/ShopHandler';
 import { GAMEHELPERS } from '../Helpers/GameHelpers';
 import MainScreen from './MainScreen';
+import { RESOURCES } from '../Enums';
 import { Debugger, log, LOGGING_ENABLED, DEBUGGING_ENABLED } from './Debugger'
 
 /*
@@ -59,15 +60,14 @@ export default function Game() {
 
     //Must be created before the action handler
     //TODO: this file should hold the logic that bings the handlers together rather than any of the handlers seeing each other
-    const rollDice = (notatedDice) => {
-        diceJar.show().roll(notatedDice);
-    }
-
+    // const rollDice = (notatedDice) => {
+    //     diceJar.show().roll(notatedDice);
+    // }
     //TODO: ADD A MASTER DISABLE FLAG FOR ANYTHING THAT MIGHT NEED TO WAIT (ROLLING DICE NEEDS TO WAIT FOR LOADING ASSETS AND TO WAIT FOR EXISTING DICE TO FINISH ROLLING)
     //Set up resource stores 
     const resourceHandler = new ResourceHandler()
     const curCharacter = new Character({ name: "Billy Wigglestick" })
-    const actionHandler = new ActionHandler({ "curResources": resourceHandler, "curCharacter": curCharacter, rollDice: rollDice })
+    const actionHandler = new ActionHandler({"curCharacter": curCharacter, processRewards:processRewards })
     const shopHandler = new ShopHandler(resourceHandler, curCharacter)
 
     const [diceRolling, setDiceRolling] = useState(false)
@@ -78,10 +78,14 @@ export default function Game() {
         shopHandler.setCurShop("htg")
     }, [])
 
+    
     /******************************************************
- * DICE HANDLERS
- ******************************************************/
-
+    * DICE HANDLERS
+    ******************************************************/
+    const rollDice = (notatedDice) => {
+        diceJar.show().roll(notatedDice);
+    }
+    
     diceJar.onRollComplete = (results) => {
         //TODO: Handle other reasons to roll the dice here
 
@@ -113,10 +117,10 @@ export default function Game() {
         //log("Outcome: ", outcome)
     }
 
+
     /******************************************************
      * Game Logic
      ******************************************************/
-
     function initGame() {
 
     }
@@ -168,20 +172,21 @@ export default function Game() {
 
     }
 
-    function processRewards(rewards, multiplier) {
+    function processRewards(rewards) {
         //log("rewards: ", JSON.stringify(rewards))
-        log(`multiplier: ${multiplier}`)
+        let multiplier = 1
+        //multiplier = getMultiplier() //Maybe search the character for relevant items/perks?
         for (const [resource, value] of Object.entries(rewards)) {
             log(`resource:${resource}, value:${value}}`)
-            let newResource = value * (multiplier ?? 1)
+            let newResource = value * multiplier
             switch (resource) {
-                case "wood":
+                case RESOURCES.WOOD:
                     log("adding wood")
-                    this._curResources.addWood(newResource)
+                    resourceHandler.addWood(newResource)
                     break;
-                case "coin":
+                case RESOURCES.COINS:
                     log("adding coins")
-                    this._curResources.addCoins(newResource)
+                    resourceHandler.addCoins(newResource)
                     break;
                 default:
                     log("Resource Not Accounted For : ", resource)
