@@ -57,35 +57,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 })
 
 export default function Game() {
-
-    //Must be created before the action handler
     //TODO: this file should hold the logic that bings the handlers together rather than any of the handlers seeing each other
-    // const rollDice = (notatedDice) => {
-    //     diceJar.show().roll(notatedDice);
-    // }
     //TODO: ADD A MASTER DISABLE FLAG FOR ANYTHING THAT MIGHT NEED TO WAIT (ROLLING DICE NEEDS TO WAIT FOR LOADING ASSETS AND TO WAIT FOR EXISTING DICE TO FINISH ROLLING)
     //Set up resource stores 
-    const resourceHandler = new ResourceHandler()
-    const curCharacter = new Character({ name: "Billy Wigglestick" })
-    const actionHandler = new ActionHandler({"curCharacter": curCharacter, processRewards:processRewards })
-    const shopHandler = new ShopHandler(resourceHandler, curCharacter)
-
-    const [diceRolling, setDiceRolling] = useState(false)
-    const [curLocation, setCurLocation] = useState("Village")
-    const [gameDate, setGameDate] = useState(0)
+    const [playerLog, setPlayerLog] = useState([]);
+    const [actionHandler] = useState(new ActionHandler());
+    const [resourceHandler] = useState(new ResourceHandler());
+    const [curCharacter] = useState(new Character({ name: "Billy Wigglestick" }));
+    const [shopHandler] = useState(new ShopHandler(resourceHandler, curCharacter));
+    const [curLocation, setCurLocation] = useState("Village");
+    //const [gameDate, setGameDate] = useState(0);
 
     useEffect(() => {
         shopHandler.setCurShop("htg")
     }, [])
 
-    
+
     /******************************************************
     * DICE HANDLERS
     ******************************************************/
     const rollDice = (notatedDice) => {
         diceJar.show().roll(notatedDice);
     }
-    
+
     diceJar.onRollComplete = (results) => {
         //TODO: Handle other reasons to roll the dice here
 
@@ -108,10 +102,23 @@ export default function Game() {
             let outcome = diceResults.outcome
             let position = GAMEHELPERS.determinePosition(action, curCharacter)
             let effect = GAMEHELPERS.determineEffect(action)
-            outcome = boundResolve(results, effect, outcome)
-            //addActionLog(outcome)
+            boundResolve(results, effect, outcome)
+                .then((outcome) => {
+                    //TODO: This log gets overwridden by the next one when an action complete
+                    //Maybe this is fine? Probably I want both messages
+                    //both values should be sent to addPlayerlog at the same time to ensure both updates happen
+                    addPlayerLog(outcome.message)
+                    return outcome
+                })
+                .then((outcome) => {
+                    if (outcome.actionComplete === true) {
+                        actionHandler.resolveAction(action)
+                        processRewards(action.rewards)
+                        addPlayerLog(action.message)
+                    }
+                })
             //TODO: Process the outcome. display some messages
-
+            //addPlayerLog
         }
         //log("Dice Results: ", results);
         //log("Outcome: ", outcome)
@@ -129,6 +136,11 @@ export default function Game() {
 
     }
 
+    function rest(){
+        curCharacter.rest()
+        //move world state forward
+    }
+
     function speakTo(npc) {
 
     }
@@ -140,7 +152,7 @@ export default function Game() {
         let notatedDice = `${dice}d6`
         rollDice(notatedDice)
         //reduce AP
-        curCharacter.curAP = curCharacter.curAP - action.tierReq
+        curCharacter.curAP = curCharacter.curAP - action.tier
         actionHandler.refreshActions()
     }
 
@@ -195,17 +207,61 @@ export default function Game() {
         }
     }
 
-    //async function addActionLog(message) {
-    //    let newLog = [...actionLog]
-    //    //The outcomes returned by resolve roll are promises. This seems like the only place to wait for the to resolve or I end up with an array of promises instead of messages for the action log
-    //    let newMessage = await message
-    //    log("New Message AddedL:::::::::::::::::::::::::::::")
-    //    log(newMessage)
-    //    newLog.unshift(newMessage)
-    //    log(newLog)
-    //    setActionLog(newLog)
-    //}
+    async function addPlayerLog(message) {
+        let newLog = [...playerLog]
+        //The outcomes returned by resolve roll are promises. This seems like the only place to wait for the to resolve or I end up with an array of promises instead of messages for the action log
+        let newMessage = await message
+        log("New Message Added:::::::::::::::::::::::::::::")
+        log(newMessage)
+        newLog.unshift(newMessage)
+        log(newLog)
+        setPlayerLog(newLog)
+    }
 
+    /******************************************************
+     * HELPERS
+     ******************************************************/
+    function isActionDisabled(action) {
+        let disabled = false
+        //Check tier
+        if (curCharacter.tier < action.tier)
+            disabled = true
+
+        if (!disabled && curCharacter.curAP < action.tier) {
+            //log(`(${curCharacter.curAP}/${action.tier})Not enough AP to do ${action.name}`)
+            disabled = true
+        }
+
+        //Check resources
+        if (!disabled && action.resourceReq.length > 0) {
+            //log("Checking resources")
+            for (const [resourceName, requirement] of Object.entries(action.resourceReqs)) {
+                if (resourceHandler[resourceName] < requirement) {
+                    disabled = true
+                }
+            }
+        }
+
+        //Check Items
+        //TODO: Convert to checking for a minimum number of item tags rather than specific items
+        if (!disabled && action.itemReq.length > 0) {
+            //log("checking items")
+            let itemsFound = true
+            let itemIndex = 0
+            //Loop through the item reqs
+            while (itemsFound && itemIndex < action.itemReq.length) {
+                let item = curCharacter.inventory.get(action.itemReq[itemIndex])
+                //log("item found: ", item)
+                //if we don't find an item stop looking
+                if (item === undefined)
+                    itemsFound = false
+                itemIndex++
+            }
+            disabled = !itemsFound
+        }
+        //log(`${action.name} is ${available ? "available" : "unavailable"}`)
+        return disabled
+    }
 
     /******************************************************
      * DATA BINDING AND DEBUGGING
@@ -224,6 +280,7 @@ export default function Game() {
                 curCharacter={curCharacter}
                 shopHandler={shopHandler}
                 curLocation={curLocation}
+                playerLog={playerLog}
                 log={log}
                 children={
                     <MainScreen
@@ -234,7 +291,9 @@ export default function Game() {
                         curLocation={curLocation}
                         log={log}
                         attemptAction={attemptAction}
-                    //actionLog={actionLog}
+                        playerLog={playerLog}
+                        isActionDisabled={isActionDisabled}
+                        rest={rest}
                     />
                 }
             />
@@ -248,8 +307,10 @@ export default function Game() {
                 shopHandler={shopHandler}
                 curLocation={curLocation}
                 log={log}
+                playerLog={playerLog}
                 attemptAction={attemptAction}
-            //actionLog={actionLog}
+                isActionDisabled={isActionDisabled}
+                rest={rest}
             />
         }
         return view
@@ -267,7 +328,9 @@ export default function Game() {
                 shopHandler={shopHandler}
                 curLocation={curLocation}
                 attemptAction={attemptAction}
-            //actionLog={actionLog}
+                playerLog={playerLog}
+                isActionDisabled={isActionDisabled}
+                rest={rest}
             />
             {/*<div ref={diceBoxRef} id="dice-box"></div>*/}
         </>

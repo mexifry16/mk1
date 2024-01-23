@@ -14,12 +14,10 @@ export default class ActionHandler {
     constructor(args) {
         //log("Constructing Action Handler")
         //this.rootStore = rootStore
-        this._actionList = []
-        this._actionLog = []
+        this._actionList = [] //all actions unlocked at this point wether eligible or not
+        this._hiddenActions = [] //A way to hide unlocked actions for later use or to hide pathways after making choices
+        this._completedActions = {} //a list of completed actions {actionCode:timesCompleted}
         this._curAction = undefined
-        //this._ineligibleActions = []
-        //this._actionClocks = []
-        //this._curLocation = new Location() 
         this._curLocation = {
             locCode: "vil",
             name: "Village",
@@ -27,8 +25,7 @@ export default class ActionHandler {
             itemReq: [],
             resourceReq: {}
         }
-        this._curCharacter = new Character()
-        this._processRewards = undefined
+        //this._curCharacter = new Character()
 
         if (args)
             Object.keys(args).forEach((key) => {
@@ -45,9 +42,9 @@ export default class ActionHandler {
      *GETTERS AND SETTERS 
      */
 
-    get curCharacter() {
-        return this._curCharacter
-    }
+    // get curCharacter() {
+    //     return this._curCharacter
+    // }
 
     get actions() {
         return this._actionList
@@ -78,33 +75,33 @@ export default class ActionHandler {
         this.refreshActions()
     }
 
-    changeCharacter(character) {
-        this._curCharacter = character
-        this.refreshActions()
-    }
+    // changeCharacter(character) {
+    //     this._curCharacter = character
+    //     this.refreshActions()
+    // }
 
 
     /***********************************************************
      * DICE ROLL HELPERS
      */
 
-    determinePosition(action) {
-        let position = POSITIONS.CONTROLLED
-        if (action.repeats == 0)
-            position = POSITIONS.RISKY
-        if (action.tierReq >= this._curCharacter.tier + 1)
-            position = POSITIONS.RISKY
-        if (action.tierReq >= this._curCharacter.tier + 2)
-            position = POSITIONS.DESPERATE
-        //check for action unique risks?
-        //check for relevant items to bring position down
-        //maybe use a tug of war system to determine position. +1s and -1s cancel each other out leaving an int somwhere for controlled, risky, desperate
-        return position
-    }
+    // determinePosition(action) {
+    //     let position = POSITIONS.CONTROLLED
+    //     if (action.repeats == 0)
+    //         position = POSITIONS.RISKY
+    //     if (action.tierReq >= this._curCharacter.tier + 1)
+    //         position = POSITIONS.RISKY
+    //     if (action.tierReq >= this._curCharacter.tier + 2)
+    //         position = POSITIONS.DESPERATE
+    //     //check for action unique risks?
+    //     //check for relevant items to bring position down
+    //     //maybe use a tug of war system to determine position. +1s and -1s cancel each other out leaving an int somwhere for controlled, risky, desperate
+    //     return position
+    // }
 
-    determineEffect() {
-        return EFFECTS.STANDARD
-    }
+    // determineEffect() {
+    //     return EFFECTS.STANDARD
+    // }
 
 
     /***********************************************************
@@ -120,11 +117,11 @@ export default class ActionHandler {
 
         let clockSettings = {}
         clockSettings.clockCode = action.actionCode
-        clockSettings.segments = action.tierReq + 2
+        clockSettings.segments = action.tier + 2
         clockSettings.repeatable = (action.repeats > 0 || action.repeats < 0) ? true : false
         clockSettings.removable = action.removable
         clockSettings.remove = this.removeClock.bind(this)
-        clockSettings.resolve = this.resolveClock.bind(this)
+        //clockSettings.resolve = this.resolveClock.bind(this)
         clockSettings.crit = false
 
         return (clockSettings)
@@ -136,14 +133,8 @@ export default class ActionHandler {
         log(`Clock ${clockCode} is being removed (Action Handler)`)
     }
 
-    resolveClock(clockCode) {
-        let action = this.actions.find((searchAction) => { return (searchAction.actionCode === clockCode) })
-
-        this._processRewards(action.rewards)
-        if (action.clock.crit === true) {
-            //process unique effects?
-            //this._processRewards(action.rewards)
-        }
+    resolveAction(action) {
+        this.tallyCompletedAction(action.actionCode)
         action.repeats--
         if (action.repeats === 0) {
             //remove the action
@@ -200,7 +191,7 @@ export default class ActionHandler {
     async resolveRoll(results, effect, outcome) {
         //log("Action: ", this.curAction)
         let message = `You rolled ${results[0].rolls.length}d6 and got ${results[0].value}`
-
+        let actionComplete = false
         if (this.curAction != undefined) {
             //log("Resolving action roll")
             //log("Outcome: ", outcome)
@@ -212,19 +203,19 @@ export default class ActionHandler {
                     //double clock?
                     //other rewards?
                     clock.crit = true
-                    clock.increment(progress)
+                    actionComplete = clock.increment(progress)
                     message = "Critical Success! "
                     if (this.curAction.critMessage)
                         message += this.curAction.critMessage
                     break
                 case OUTCOMES.SUCCESS:
-                    clock.increment(progress)
+                    actionComplete = clock.increment(progress)
                     message = "Success! "
                     if (this.curAction.successMessage)
                         message += this.curAction.successMessage
                     break
                 case OUTCOMES.PARTIAL_SUCCESS:
-                    clock.increment(progress)
+                    actionComplete = clock.increment(progress)
                     //TODO: Process partial success
                     message = "Partial Success. "
                     if (this.curAction.partialMessage)
@@ -250,20 +241,22 @@ export default class ActionHandler {
         }
         this._curAction = undefined
         this.refreshActions()
-        log(message)
-        this.addActionLog(message)
+        return ({message:message, actionComplete:actionComplete})
     }
 
 
-    rest() {
-        //Other stuff that happens during rests goes here (e.g. advancing  clocks)
-        this._curCharacter.rest()
-        this.refreshActions()
+    // rest() {
+    //     //Other stuff that happens during rests goes here (e.g. advancing  clocks)
+    //     this._curCharacter.rest()
+    //     this.refreshActions()
 
-    }
+    // }
 
-    addActionLog(message) {
-        this._actionLog.unshift(message)
+    tallyCompletedAction(actionCode) {
+        let curTally = (actionCode in this._completedActions 
+            ? this._completedActions[actionCode] : 0)
+        //let curTally = this._completedActions.get(actionCode)
+        this._completedActions[actionCode] = curTally + 1
     }
 
 
@@ -275,19 +268,21 @@ export default class ActionHandler {
         return this._actionList.find((action) => { return (action.actionCode === actionCode) })
     }
 
+    //TODO: I will probably feed actions into the game via quests and events so this will likely be obsolete
     refreshActions() {
         log("current Actions: ", this._actionList)
         log("refreshing actions")
-        this.refreshAvailability()
+        //this.refreshAvailability()
         let newActions = []
 
         //Get all area actions
+    
         let refreshedActions = this.getActionsByLocation(this._curLocation)
         log("location filter: ", refreshedActions)
 
         //Filter by eligibility
-        refreshedActions = this.filterActionsByCharacter(this._curCharacter, refreshedActions)
-        log("character filter: ", refreshedActions)
+        //refreshedActions = this.filterActionsByCharacter(this._curCharacter, refreshedActions)
+        //log("character filter: ", refreshedActions)
 
         //Compare against existing actions
         refreshedActions.forEach((mysteryAction) => {
@@ -316,23 +311,23 @@ export default class ActionHandler {
         this._actionList = this._actionList.concat(newActions)
     }
 
-    refreshAvailability() {
-        this._actionList.forEach((action) => {
-            action.disabled = !this.actionAvailable(this._curCharacter, action)
-        })
-    }
+    // refreshAvailability() {
+    //     this._actionList.forEach((action) => {
+    //         action.disabled = !this.actionAvailable(this._curCharacter, action)
+    //     })
+    // }
 
     actionAvailable(character, action) {
         let available = true
 
-        //Check tier
-        if (character.tier < action.tierReq)
-            available = false
+        // //Check tier
+        // if (character.tier < action.tierReq)
+        //     available = false
 
-        if (available && character.curAP < action.tierReq) {
-            log(`(${character.curAP}/${action.tierReq})Not enough AP to do ${action.name}`)
-            available = false
-        }
+        // if (available && character.curAP < action.tierReq) {
+        //     log(`(${character.curAP}/${action.tierReq})Not enough AP to do ${action.name}`)
+        //     available = false
+        // }
         
 
         //Check resources
@@ -346,22 +341,22 @@ export default class ActionHandler {
         // }
 
         //Check Items
-        if (available && action.itemReq.length > 0) {
-            //log("checking items")
-            let itemsFound = true
-            let itemIndex = 0
-            //Loop through the item reqs
-            while (itemsFound && itemIndex < action.itemReq.length) {
-                let item = this._curCharacter.inventory.get(action.itemReq[itemIndex])
-                //log("item found: ", item)
-                //if we don't find an item stop looking
-                if (item === undefined)
-                    itemsFound = false //TODO: I don't like doing this. Come up with a better loop condition
-                //if(item != undefined && item.quantity > 0)
-                itemIndex++
-            }
-            available = itemsFound
-        }
+        // if (available && action.itemReq.length > 0) {
+        //     //log("checking items")
+        //     let itemsFound = true
+        //     let itemIndex = 0
+        //     //Loop through the item reqs
+        //     while (itemsFound && itemIndex < action.itemReq.length) {
+        //         let item = this._curCharacter.inventory.get(action.itemReq[itemIndex])
+        //         //log("item found: ", item)
+        //         //if we don't find an item stop looking
+        //         if (item === undefined)
+        //             itemsFound = false //TODO: I don't like doing this. Come up with a better loop condition
+        //         //if(item != undefined && item.quantity > 0)
+        //         itemIndex++
+        //     }
+        //     available = itemsFound
+        // }
         //log(`${action.name} is ${available ? "available" : "unavailable"}`)
         return available
     }
@@ -391,8 +386,8 @@ export default class ActionHandler {
         let eligibleActions = []
 
         actions.forEach((action) => {
-            if (this.actionAvailable(character, action))
-                eligibleActions.push(action)
+            //if (this.actionAvailable(character, action))
+            eligibleActions.push(action)
             //else
             //ineligibleActions.push(action)
         })

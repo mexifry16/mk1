@@ -41,13 +41,13 @@ export default class {
         this._status = ["well"]
         this._equipped = new Map([["head", null], ["chest", null], ["weapon", null]])
         this._fate = 0
-        this._STR = 10
-        this._DEX = 10
-        this._CON = 10
-        this._INT = 10
-        this._WIS = 10
-        this._CHA = 10
-        this._LCK = 10
+        this._STR = 18
+        this._DEX = 18
+        this._CON = 18
+        this._INT = 18
+        this._WIS = 18
+        this._CHA = 18
+        this._LCK = 18
         this.class = 'Peasant'
 
         //TODO SHOULD BE keyExistsAndHasValue()

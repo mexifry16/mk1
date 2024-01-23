@@ -19,14 +19,23 @@ import { log } from './Debugger';
 
 
 
-export default function MainScreen({ resourceHandler, actionHandler, curCharacter, shopHandler, curLocation, test, attemptAction }) {
+export default function MainScreen({
+    resourceHandler,
+    actionHandler,
+    curCharacter,
+    shopHandler,
+    curLocation,
+    playerLog,
+    attemptAction,
+    isActionDisabled,
+    rest }) {
     const [menuBarOpen, setMenuBarOpen] = useState(false)
     const [currentView, setCurrentView] = useState(0)
 
     const rollDice = (e) => {
         e.preventDefault();
     };
-   
+
     const toggleDrawer = (open) => (event) => {
         log("test")
         if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -77,10 +86,10 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
 
     const CharacterDetails = observer(({ actionHandler }) => {
         let gems = []
-        for (let i = 0; i < actionHandler.curCharacter.AP; i++) {
-            if (i < actionHandler.curCharacter.curAP)
+        for (let i = 0; i < curCharacter.AP; i++) {
+            if (i < curCharacter.curAP)
                 gems.push(<Avatar key={i} src={ruby} />)
-            if (i >= actionHandler.curCharacter.curAP)
+            if (i >= curCharacter.curAP)
                 gems.push(<Avatar key={i} src={spentRuby} />)
         }
 
@@ -88,7 +97,7 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
             <Stack direction="row">
                 <Stack direction="column">
                     <Typography variant="h4">
-                        {actionHandler.curCharacter.name}
+                        {curCharacter.name}
                     </Typography>
                     <Stack direction="row">
                         <Typography variant="h5">
@@ -102,7 +111,7 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
                 <Button
                     variant="contained"
                     color="secondary"
-                    onClick={() => { actionHandler.rest() }}
+                    onClick={() => { rest() }}
                     sx={{ position: "absolute", top: "20%", bottom: "20%", right: "2%", minWidth: 100 }}>
                     REST
                 </Button>
@@ -124,6 +133,10 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
         //    //addActionLog(result)
 
         //}
+
+        // const checkAvailability = (action) => {
+        //     return isActionDisabled(action)
+        // }
 
         function DisplayActionProgress({ progress }) {
             //log("Getting progress")
@@ -154,7 +167,7 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
                     {/* {availbleActions.map((action, actionIndex) => { */}
                     {actionHandler.actions.map((action, actionIndex) => {
                         return (
-                            <Stack direction="row" key={action.name} >
+                            <Stack direction="row" key={actionIndex} >
                                 <Tooltip
                                     title={
                                         <>
@@ -165,14 +178,16 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
                                     }
                                     placement="right-end">
                                     <span>
-                                        <Button disabled={action.disabled} variant="outlined" onClick={() => { attemptAction(action) }}>
+                                        <Button
+                                            disabled={isActionDisabled(action)}
+                                            variant="outlined"
+                                            onClick={() => { attemptAction(action) }}>
                                             <Stack direction="column">
                                                 <Typography variant="h6">
                                                     {action.name}
                                                 </Typography>
                                                 <Divider />
                                                 <Stack direction="row">
-                                                    test
                                                     <DisplayActionProgress progress={action.clock.progress} />
 
                                                 </Stack>
@@ -212,9 +227,9 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
                 <Typography >
                     Action Log
                 </Typography>
-                {actionHandler.actionLog.length > 0 ? (
+                {playerLog.length > 0 ? (
                     <>
-                        {actionHandler.actionLog.map((logItem, logIndex) => {
+                        {playerLog.map((logItem, logIndex) => {
                             return (
                                 <Stack key={logIndex} sx={{ height: 'auto', width: '100%', backgroundColor: 'lightgray' }} >
                                     <Typography>
@@ -224,9 +239,9 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
                                 </Stack>
                             )
                         })}
-                  </>
-                ): (null) }
-                
+                    </>
+                ) : (null)}
+
             </Stack>
         )
     })
@@ -240,16 +255,6 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
             <div style={{ flex: 1 }}>
                 <Sidebar children={
                     [
-                        
-                        <Button
-                            variant="contained"
-                            id="roll-all"
-                            className="button"
-                            aria-label="Roll Attributes Points"
-                            onClick={rollDice}
-                        >
-                            Roll Dice
-                        </Button>,
                         <ResourceDisplay key={0} resourceHandler={resourceHandler} actionHandler={actionHandler} />,
                         <CharacterInventory key={1} curCharacter={curCharacter} />
 
@@ -285,7 +290,12 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
                             </Drawer>
                         </Toolbar>
                     </AppBar>
-                    <Actions resourceHandler={resourceHandler} actionHandler={actionHandler} attemptAction={attemptAction} />
+                    <Actions
+                        resourceHandler={resourceHandler}
+                        actionHandler={actionHandler}
+                        attemptAction={attemptAction}
+                        isActionDisabled={isActionDisabled}
+                    />
                 </div>
                 <Split style={{ height: '20%' }}>
                     <div style={{ flex: 1, overflow: 'auto' }}>

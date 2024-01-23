@@ -56,13 +56,14 @@ export default class Clock {
 
     increment(segments) {
         segments = segments ?? 1
+        let clockCompleted = false
         let newSegments = this._completedSegments + segments
         log(`Incrementing clock by ${segments} to a total of ${newSegments}`)
         switch (true) {
             case (newSegments >= this._segments):
                 log("complete or overflow")
                 this._completedSegments = newSegments - this._segments
-                this.resolveClock(this._clockCode)
+                clockCompleted = true
                 break
             case (newSegments < this._segments && newSegments > 0):
                 log("progress made but not complete")
@@ -77,11 +78,12 @@ export default class Clock {
             default:
                 log("(Clock.js, `We shouldn't be able to get here")
         }
+        return clockCompleted
     }
 
-    resolveClock() {
-        this._resolve(this._clockCode)
-    }
+    // resolveClock() {
+    //     this._resolve(this._clockCode)
+    // }
 
     removeClock() {
         this._remove(this._clockCode)
