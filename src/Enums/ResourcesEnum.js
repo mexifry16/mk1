@@ -1,5 +1,9 @@
 const RESOURCES = {
-    COINS: "Coins",
+    PLATINUM:"Platinum",
+    GOLD:"Gold",
+    SILVER:"Silver",
+    COPPER:"Copper",
+    COINS:"Coins",
     WOOD: "Wood",
     BLUEBERRIES: "Blueberries"
 }
