@@ -20,35 +20,13 @@ import { log } from './Debugger';
 
 
 export default function MainScreen({ resourceHandler, actionHandler, curCharacter, shopHandler, curLocation, test, attemptAction }) {
-
-    //useEffect(() => {
-    //    let diceBox = document.getElementById("dice-box")
-    //    if (diceBox != null) {
-    //        log("Dicebox element found, initiating")
-    //        //Dice.init().then(() => {
-    //        //    // clear dice on click anywhere on the screen
-    //        //    document.addEventListener("mousedown", () => {
-    //        //        const diceBoxCanvas = document.getElementById("dice-canvas");
-    //        //        if (window.getComputedStyle(diceBoxCanvas).display !== "none") {
-    //        //            Dice.hide().clear();
-    //        //        }
-    //        //    });
-    //        //});
-    //    }
-    //},[])
+    const [menuBarOpen, setMenuBarOpen] = useState(false)
+    const [currentView, setCurrentView] = useState(0)
 
     const rollDice = (e) => {
         e.preventDefault();
-        //const attr = e.currentTarget.id.replace("roll-", "");
-        //if (attr === "all") {
-        //    return onRoll(["3d6", "3d6", "3d6", "3d6", "3d6", "3d6"]);
-        //}
-        //onRoll("3d6");
     };
    
-
-    const [menuBarOpen, setMenuBarOpen] = useState(false)
-
     const toggleDrawer = (open) => (event) => {
         log("test")
         if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -69,7 +47,6 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
         />)
 
     //UX State data
-    const [currentView, setCurrentView] = useState(0)
     //const [actionLog, setActionLog] = useState([])
 
     //function addActionLog(message) {
@@ -138,8 +115,6 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
      * */
 
     const Actions = observer(({ resourceHandler, actionHandler, attemptAction }) => {
-
-
 
         //function doAction(actionIndex) {
         //    //log("Doing action (Action Display)")
@@ -257,7 +232,7 @@ export default function MainScreen({ resourceHandler, actionHandler, curCharacte
     })
 
     /**
-     * render
+     * RENDER
      * */
     return (
         <Split style={{ height: "80vh", border: '1px solid #d5d5d5', borderRadius: 3 }}>
