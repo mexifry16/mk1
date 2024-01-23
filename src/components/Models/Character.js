@@ -3,7 +3,7 @@ import { keyExists } from '../../Helpers/JSONHelpers';
 import { Items } from '../../Data/Items';
 import { log } from '../Debugger';
 import { JSONCheatCopy } from '../../Helpers/JSONHelpers';
-import ATTRIBUTE from '../../Enums/AttributeEnum';
+import { ATTRIBUTES } from '../../Enums';
 
 
 export default class {
@@ -268,25 +268,25 @@ export default class {
     getAttrModifier(stat) {
         let attribute = undefined
         switch (stat) {
-            case ATTRIBUTE.STRENGTH:
+            case ATTRIBUTES.STRENGTH:
                 attribute = this.STR
                 break
-            case ATTRIBUTE.DEXTERITY:
+            case ATTRIBUTES.DEXTERITY:
                 attribute = this.DEX
                 break
-            case ATTRIBUTE.CONSTITUTION:
+            case ATTRIBUTES.CONSTITUTION:
                 attribute = this.CON
                 break
-            case ATTRIBUTE.WIDSOM:
+            case ATTRIBUTES.WIDSOM:
                 attribute = this.WIS
                 break
-            case ATTRIBUTE.INTELLIGENCE:
+            case ATTRIBUTES.INTELLIGENCE:
                 attribute = this.INT
                 break
-            case ATTRIBUTE.CHARISMA:
+            case ATTRIBUTES.CHARISMA:
                 attribute = this.CHA
                 break
-            case ATTRIBUTE.LUCK:
+            case ATTRIBUTES.LUCK:
                 attribute = this.LCK
                 break
             default:

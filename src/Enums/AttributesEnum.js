@@ -1,4 +1,4 @@
-const ATTRIBUTE = {
+const ATTRIBUTES = {
     "STRENGTH": "STR",
     "DEXTERITY": "DEX",
     "CONSTITUTION": "CON",
@@ -6,7 +6,6 @@ const ATTRIBUTE = {
     "INTELLIGENCE": "INT",
     "CHARISMA": "CHA",
     "LUCK": "LCK"
-
 }
 
-export default ATTRIBUTE
+export default ATTRIBUTES

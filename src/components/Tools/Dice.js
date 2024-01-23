@@ -1,5 +1,5 @@
 import DiceBox from "@3d-dice/dice-box";
-import OUTCOME from '../../Enums/OutcomeEnum';
+import { OUTCOMES } from '../../Enums';
 import { log } from '../Debugger';
 
 
@@ -45,19 +45,19 @@ function determineSuccess(rollResults) {
 
     switch (true) {
         case total >= 12:
-            rollResults.outcome = OUTCOME.CRITICAL_SUCCESS
+            rollResults.outcome = OUTCOMES.CRITICAL_SUCCESS
             break
         case total >= 10 && total < 12:
-            rollResults.outcome = OUTCOME.SUCCESS
+            rollResults.outcome = OUTCOMES.SUCCESS
             break
         case total >= 7 && total < 10:
-            rollResults.outcome = OUTCOME.PARTIAL_SUCCESS
+            rollResults.outcome = OUTCOMES.PARTIAL_SUCCESS
             break
         case total >= 2 && total < 7:
-            rollResults.outcome = OUTCOME.FAILURE
+            rollResults.outcome = OUTCOMES.FAILURE
             break
         default:
-            rollResults.outcome = OUTCOME.CRITFAIL
+            rollResults.outcome = OUTCOMES.CRITFAIL
             //case: total < 2
 
     }

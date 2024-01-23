@@ -1,57 +1,16 @@
 import { makeAutoObservable, runInAction, when } from "mobx"
 import { villageActions } from '../../Data/Actions';
-import { LocationCodesEnum as LocCodes } from '../../Enums/LocationCodesEnum';
+import { LOCATION_CODES } from '../../Enums';
 import { JSONCheatCopy } from '../../Helpers/JSONHelpers';
 import ResourceHandler from './ResourceHandler';
 import Character from './Character';
 import Clock from './Clock';
-import OUTCOME from '../../Enums/OutcomeEnum';
+import { OUTCOMES, POSITIONS, EFFECTS}  from '../../Enums';
 import { Dice, readRoll } from '../Tools/Dice'
 import { log } from '../Debugger';
 
-//TODO: Move these to new files in constants
-//const RESULT = {
-//    "CRITICAL_SUCCESS": "crit",
-//    "SUCCESS": "success",
-//    "PARTIAL_SUCCESS": "partial",
-//    "FAILURE": "fail",
-//    "CRITFAIL": "critfail"
-//}
-
-const EFFECT = {
-    "GREAT": "great",
-    "STANDARD": "standard",
-    "LIMITED": "limited",
-}
-
-const POSITION = {
-    "CONTROLLED": "controlled",
-    "RISKY": "risky",
-    "DESPERATE": "desperate"
-}
-
-//TODO: Real dice roll functions
-//function rollDice() {
-//    return "success"
-//}
-
-//Dice.onRollComplete = (results) => {
-//    let outcome = actionHandler.resolveRoll(results)
-//};
-
-
 export default class ActionHandler {
-       
-    //Dice.onRollComplete = (results) => {
-    //    //Give results to actionHandler
-    //    //TODO: if we ever roll dice for another reason it'll get processed like an action and break things
-    //    //let boundResolve = actionHandler.resolveRoll.bind(actionHandler)
-    //    log("Current action in game:", curAction)
-    //    //let outcome = actionHandler.resolveRoll(results).bind(actionHandler)
-    //    //let outcome = boundResolve(results)
-    //    //log("Dice Results: ", results);
-    //};
-
+   
     constructor(args) {
         //log("Constructing Action Handler")
         //this.rootStore = rootStore
@@ -153,13 +112,13 @@ export default class ActionHandler {
     //}
 
     determinePosition(action) {
-        let position = POSITION.CONTROLLED
+        let position = POSITIONS.CONTROLLED
         if (action.repeats == 0)
-            position = POSITION.RISKY
+            position = POSITIONS.RISKY
         if (action.tierReq >= this._curCharacter.tier + 1)
-            position = POSITION.RISKY
+            position = POSITIONS.RISKY
         if (action.tierReq >= this._curCharacter.tier + 2)
-            position = POSITION.DESPERATE
+            position = POSITIONS.DESPERATE
         //check for action unique risks?
         //check for relevant items to bring position down
         //maybe use a tug of war system to determine position. +1s and -1s cancel each other out leaving an int somwhere for controlled, risky, desperate
@@ -167,7 +126,7 @@ export default class ActionHandler {
     }
 
     determineEffect() {
-        return EFFECT.STANDARD
+        return EFFECTS.STANDARD
     }
 
 
@@ -219,34 +178,34 @@ export default class ActionHandler {
     determineProgress(effect, result) {
         let segments = 0
         switch (result) {
-            case OUTCOME.CRITICAL_SUCCESS:
-                if (effect === EFFECT.GREAT)
+            case OUTCOMES.CRITICAL_SUCCESS:
+                if (effect === EFFECTS.GREAT)
                     segments = 6
-                if (effect === EFFECT.STANDARD)
+                if (effect === EFFECTS.STANDARD)
                     segments = 4
-                if (effect == EFFECT.LIMITED)
+                if (effect == EFFECTS.LIMITED)
                     segments = 2
                 break
-            case OUTCOME.SUCCESS:
-                if (effect === EFFECT.GREAT)
+            case OUTCOMES.SUCCESS:
+                if (effect === EFFECTS.GREAT)
                     segments = 3
-                if (effect === EFFECT.STANDARD)
+                if (effect === EFFECTS.STANDARD)
                     segments = 2
-                if (effect == EFFECT.LIMITED)
+                if (effect == EFFECTS.LIMITED)
                     segments = 1
                 break
-            case OUTCOME.PARTIAL_SUCCESS:
-                if (effect === EFFECT.GREAT)
+            case OUTCOMES.PARTIAL_SUCCESS:
+                if (effect === EFFECTS.GREAT)
                     segments = 3
-                if (effect === EFFECT.STANDARD)
+                if (effect === EFFECTS.STANDARD)
                     segments = 2
-                if (effect == EFFECT.LIMITED)
+                if (effect == EFFECTS.LIMITED)
                     segments = 1
                 break
-            case OUTCOME.FAIL:
+            case OUTCOMES.FAIL:
                 segments = 0
                 break
-            case OUTCOME.CRITFAIL:
+            case OUTCOMES.CRITFAIL:
                 segments = 0
                 break
             default:
@@ -301,7 +260,7 @@ export default class ActionHandler {
             let progress = this.determineProgress(effect, outcome)
             //parse results
             switch (outcome) {
-                case OUTCOME.CRITICAL_SUCCESS:
+                case OUTCOMES.CRITICAL_SUCCESS:
                     //double clock?
                     //other rewards?
                     clock.crit = true
@@ -310,27 +269,27 @@ export default class ActionHandler {
                     if (action.critMessage)
                         message += action.critMessage
                     break
-                case OUTCOME.SUCCESS:
+                case OUTCOMES.SUCCESS:
                     clock.increment(progress)
                     message = "Success! "
                     if (action.successMessage)
                         message += action.successMessage
                     break
-                case OUTCOME.PARTIAL_SUCCESS:
+                case OUTCOMES.PARTIAL_SUCCESS:
                     clock.increment(progress)
                     //TODO: Process partial success
                     message = "Partial Success. "
                     if (action.partialMessage)
                         message += action.partialMessage
                     break
-                case OUTCOME.FAILURE:
+                case OUTCOMES.FAILURE:
                     //TODO" Process failure
                     message = `You failed to make meaningful progress while attempting to ${action.name}`
                     if (action.failMessage)
                         message = action.failMessage
                     //Nothing BUT
                     break
-                case OUTCOME.CRITFAIL:
+                case OUTCOMES.CRITFAIL:
                     //TODO: Process crit failure
                     message = `You failed spectacularly while attempting to ${action.name}`
                     if (action.critfailMessage)
@@ -544,10 +503,10 @@ export default class ActionHandler {
             filterLocation = location
 
         switch (filterLocation.locCode) { //TODO. how I address parts of the location and character are probably going to change
-            case LocCodes.Village:
+            case LOCATION_CODES.VILLAGE:
                 areaList = JSONCheatCopy(villageActions)
                 break;
-            case LocCodes.Beach:
+            case LOCATION_CODES.BEACH:
                 areaList = JSONCheatCopy(villageActions)
                 break;
             default:

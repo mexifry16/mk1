@@ -1,9 +1,6 @@
-export const LocationCodesEnum = {
-    "Village": "vil",
-    "Beach":"bch"
+const LOCATION_CODES = {
+    "VILLAGE": "vil",
+    "BEACH": "bch"
 }
 
-export const LocationCodesReverseEnum = {
-    "vil": "Village",
-    "bch": "Beach"
-}
+export default LOCATION_CODES

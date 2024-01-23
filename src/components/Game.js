@@ -24,21 +24,21 @@ import { Debugger, log, LOGGING_ENABLED, DEBUGGING_ENABLED } from './Debugger'
  * Dice Initializers
  ******************************************************/
 
- const diceJar = 
- new DiceBox(
-     "#dice-box", // target DOM element to inject the canvas for rendering
-     {
-         id: "dice-canvas", // canvas element id
-         assetPath: process.env.PUBLIC_URL + "/assets/dice-box/",
-         startingHeight: 8,
-         throwForce: 6,
-         spinForce: 5,
-         lightIntensity: 0.9,
-         theme: "default"
-     }
- )
+const diceJar =
+    new DiceBox(
+        "#dice-box", // target DOM element to inject the canvas for rendering
+        {
+            id: "dice-canvas", // canvas element id
+            assetPath: process.env.PUBLIC_URL + "/assets/dice-box/",
+            startingHeight: 8,
+            throwForce: 6,
+            spinForce: 5,
+            lightIntensity: 0.9,
+            theme: "default"
+        }
+    )
 
- document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
     //log("********************************************")
     //log("Asset Path:")
     //log(Dice.assetPath)
@@ -59,67 +59,137 @@ export default function Game() {
 
     //Must be created before the action handler
     //TODO: this file should hold the logic that bings the handlers together rather than any of the handlers seeing each other
-    const rollDice = (notatedDice)=>{
+    const rollDice = (notatedDice) => {
         diceJar.show().roll(notatedDice);
     }
 
-     //TODO: ADD A MASTER DISABLE FLAG FOR ANYTHING THAT MIGHT NEED TO WAIT (ROLLING DICE NEEDS TO WAIT FOR LOADING ASSETS AND TO WAIT FOR EXISTING DICE TO FINISH ROLLING)
+    //TODO: ADD A MASTER DISABLE FLAG FOR ANYTHING THAT MIGHT NEED TO WAIT (ROLLING DICE NEEDS TO WAIT FOR LOADING ASSETS AND TO WAIT FOR EXISTING DICE TO FINISH ROLLING)
     //Set up resource stores 
     const resourceHandler = new ResourceHandler()
     const curCharacter = new Character({ name: "Billy Wigglestick" })
     const actionHandler = new ActionHandler({ "curResources": resourceHandler, "curCharacter": curCharacter, rollDice: rollDice })
     const shopHandler = new ShopHandler(resourceHandler, curCharacter)
-    
+
     const [diceRolling, setDiceRolling] = useState(false)
     const [curLocation, setCurLocation] = useState("Village")
     const [gameDate, setGameDate] = useState(0)
-    
+
     useEffect(() => {
         shopHandler.setCurShop("htg")
     }, [])
 
-        /******************************************************
-     * DICE HANDLERS
-     ******************************************************/
+    /******************************************************
+ * DICE HANDLERS
+ ******************************************************/
 
-        diceJar.onRollComplete = (results) => {
-            //TODO: Handle other reasons to roll the dice here
-    
-            let message = `You rolled ${results[0].rolls.length}d6 and got ${results[0].value}`
-            log(message)
-            let modifiers = { total: 0 }
-            let highAttr = undefined
-            let action = actionHandler.curAction
-            let outcome = undefined
-    
-            if (action != undefined) {
-                message = `There was an error attempting ${action.name}`
-                highAttr = curCharacter.getHighestMod(action.statReq)
-                modifiers[highAttr.attr] = highAttr.mod
-                modifiers.total += highAttr.mod
-    
-                let diceResults = readRoll(results, modifiers)
-                log("Dice results: ", diceResults)
-    
-                let outcome = diceResults.outcome
-                let position = GAMEHELPERS.determinePosition(action, curCharacter)
-                let effect = GAMEHELPERS.determineEffect(action)
-                outcome = boundResolve(results, effect, outcome)
-                //addActionLog(outcome)
-                //TODO: Process the outcome. display some messages
-    
-            }
-            //log("Dice Results: ", results);
-            //log("Outcome: ", outcome)
-        };
+    diceJar.onRollComplete = (results) => {
+        //TODO: Handle other reasons to roll the dice here
+
+        let message = `You rolled ${results[0].rolls.length}d6 and got ${results[0].value}`
+        log(message)
+        let modifiers = { total: 0 }
+        let highAttr = undefined
+        let action = actionHandler.curAction
+        let outcome = undefined
+
+        if (action != undefined) {
+            message = `There was an error attempting ${action.name}`
+            highAttr = curCharacter.getHighestMod(action.statReq)
+            modifiers[highAttr.attr] = highAttr.mod
+            modifiers.total += highAttr.mod
+
+            let diceResults = readRoll(results, modifiers)
+            log("Dice results: ", diceResults)
+
+            let outcome = diceResults.outcome
+            let position = GAMEHELPERS.determinePosition(action, curCharacter)
+            let effect = GAMEHELPERS.determineEffect(action)
+            outcome = boundResolve(results, effect, outcome)
+            //addActionLog(outcome)
+            //TODO: Process the outcome. display some messages
+
+        }
+        //log("Dice Results: ", results);
+        //log("Outcome: ", outcome)
+    }
 
     /******************************************************
      * Game Logic
      ******************************************************/
 
-    function initGame(){
+    function initGame() {
 
     }
+
+    function changeLocation() {
+
+    }
+
+    function speakTo(npc) {
+
+    }
+
+    function attemptAction(action) {
+        actionHandler.curAction = action
+        //setup dice
+        let dice = 2
+        let notatedDice = `${dice}d6`
+        rollDice(notatedDice)
+        //reduce AP
+        curCharacter.curAP = curCharacter.curAP - action.tierReq
+        actionHandler.refreshActions()
+    }
+
+    function completeAction() {
+
+    }
+
+    function skillCheck() {
+
+    }
+
+    function addResource() {
+
+    }
+
+    function changeShop() {
+
+    }
+
+    function buyItem() {
+
+    }
+
+    function advanceQuest() {
+
+    }
+
+    function addQuestToJournal() {
+
+    }
+
+    function processRewards(rewards, multiplier) {
+        //log("rewards: ", JSON.stringify(rewards))
+        log(`multiplier: ${multiplier}`)
+        for (const [resource, value] of Object.entries(rewards)) {
+            log(`resource:${resource}, value:${value}}`)
+            let newResource = value * (multiplier ?? 1)
+            switch (resource) {
+                case "wood":
+                    log("adding wood")
+                    this._curResources.addWood(newResource)
+                    break;
+                case "coin":
+                    log("adding coins")
+                    this._curResources.addCoins(newResource)
+                    break;
+                default:
+                    log("Resource Not Accounted For : ", resource)
+            }
+            //addActionLog(results.message)
+        }
+    }
+
     //async function addActionLog(message) {
     //    let newLog = [...actionLog]
     //    //The outcomes returned by resolve roll are promises. This seems like the only place to wait for the to resolve or I end up with an array of promises instead of messages for the action log
@@ -131,18 +201,6 @@ export default function Game() {
     //    setActionLog(newLog)
     //}
 
-  
-
-    function attemptAction(action) {
-        actionHandler.curAction = action
-        //setup dice
-        let dice = 2
-        let notadedDice = `${dice}d6`
-        rollDice(notadedDice)
-        //reduce AP
-        curCharacter.curAP = curCharacter.curAP - action.tierReq
-        actionHandler.refreshActions()
-    }
 
     /******************************************************
      * DATA BINDING AND DEBUGGING
@@ -171,7 +229,7 @@ export default function Game() {
                         curLocation={curLocation}
                         log={log}
                         attemptAction={attemptAction}
-                        //actionLog={actionLog}
+                    //actionLog={actionLog}
                     />
                 }
             />
@@ -186,7 +244,7 @@ export default function Game() {
                 curLocation={curLocation}
                 log={log}
                 attemptAction={attemptAction}
-                //actionLog={actionLog}
+            //actionLog={actionLog}
             />
         }
         return view
@@ -204,7 +262,7 @@ export default function Game() {
                 shopHandler={shopHandler}
                 curLocation={curLocation}
                 attemptAction={attemptAction}
-                //actionLog={actionLog}
+            //actionLog={actionLog}
             />
             {/*<div ref={diceBoxRef} id="dice-box"></div>*/}
         </>

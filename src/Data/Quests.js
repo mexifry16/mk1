@@ -1,5 +1,4 @@
-import QUEST_NODE_TYPES from '../Enums/QuestNodeTypesEnum';
-import SKILLS from '../Enums/SkillsEnum';
+import { QUEST_NODE_TYPES, SKILLS} from '../Enums';
 
 const QUESTS = {
     "Blueberry Hill": {
