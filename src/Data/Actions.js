@@ -10,7 +10,7 @@ export const villageActions = [
         visibilityReq: {}, //Define a point at which actions enter into your play area even if you don't actually qualify to do them yet
         cost: {},
         outcomes: { },
-        rewards: { wood: 1 },
+        rewards: { Wood: 1 },
         message: "You punch the tree until a log falls out",
         critfailMessage: "you whiff completely",
         failMessage: "Your fists fail to do any damage",
@@ -35,13 +35,13 @@ export const villageActions = [
         itemReq: ["axe"],
         cost: {},
         outcomes: {},
-        rewards: { wood: 5 },
-        message: "You chop down a tree. and gather a few logs ",
-        progressMessage: "Your axe bites into the tree",
-        successMessage: "You manage to punch a log free",
-        critMessage: "Your axes goes clean through the tree",
-        //progressMessage: "You chop down a tree. and gather a few logs ",
-
+        rewards: { Wood: 5 },
+        message: "You chop down a tree and gather a few logs ",
+        critfailMessage: "Your axe misses the tree and hits a stone chipping the blade and neccessitating repairs",
+        failMessage: "You miss the tree entirely.",
+        partialMessage: "Your axe bites into the tree.",
+        successMessage: "Your axe bites into the tree.",
+        critMessage: "Your axes goes clean through the tree.",
         repeats: -1, /* number of times an action can be repeated. -1 for inifinite*/
         removable: false,
         clock: undefined,
@@ -57,11 +57,13 @@ export const villageActions = [
         itemReq: [],
         cost: {},
         outcomes: {},
-        rewards: { coin: 1 },
-        message: "You take your most recent harvest to market and manage to sell a few cabbages and some string beans",//TODO Can some of these be procedural?
-        progressMessage: "You punch the tree",
-        successMessage: "You manage to punch a log free",
-        critMessage: "You punch clean through the tree in a single blow",
+        rewards: { Coins: 1 },
+        message: "You sell through your supply of produce",
+        critfailMessage: "You drive customers away with overly aggresive sales tactics",
+        failMessage: "You fail to sell any produce",
+        partialMessage: "You sell some produce",
+        successMessage: "Your sell some produce",
+        critMessage: "You manage to upsell several customers",
         repeats: -1, /* number of times an action can be repeated. -1 for inifinite*/
         removable: false,
         clock: undefined,
@@ -115,7 +117,7 @@ export const villageActions = [
         statReq: ["STR"],
         resourceReq: {},
         itemReq: ["gem"],
-        cost: { gold: 5 },
+        cost: { Gold: 5 },
         outcomes: {},
         rewards: { randomVeggie: 1 },
         message: "You spend hours picking weeds and watering vegetables.",
@@ -140,8 +142,8 @@ export const villageActions = [
 //        resourceReq: {},
 //        itemReq: [],
 //        cost: {},
-//        effect: { wood: 1 },
-//        rewards: { wood: 5 },
+//        effect: { Wood: 1 },
+//        rewards: { Wood: 5 },
 //        message: "You punch the tree until a log falls out",
 //        messages: ["Your fist slams into the tree and leaves a sizable dent", "Your fist widens the whole created previously", "You manage to punch through the tree", "You fell the tree with your fists and gather its wood"],
 //        repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
@@ -154,10 +156,10 @@ export const villageActions = [
 //        resourceReq: {},
 //        itemReq: ["axe"],
 //        cost: {},
-//        effect: { wood: 5 },
-//        rewards: { wood: 5 },
+//        effect: { Wood: 5 },
+//        rewards: { Wood: 5 },
 //        message: "You chop down a tree. and gather a few logs ",
-//        messages: ["Your axe bites into the tree", "You fell the tree and gather its wood"],
+//        messages: ["Your axe bites into the tree", "You fell the tree and gather its Wood"],
 //        //progressMessage: "You chop down a tree. and gather a few logs ",
 
 //        repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
@@ -170,8 +172,8 @@ export const villageActions = [
 //        resourceReq: {},
 //        itemReq: [],
 //        cost: {},
-//        effect: { coin: 1 },
-//        rewards: { wood: 5 },
+//        effect: { Gold: 1 },
+//        rewards: { Wood: 5 },
 //        message: "You take your most recent harvest to market and manage to sell a few cabbages and some string beans",//TODO Can some of these be procedural?
 //        messages: ["You take your most recent harvest to market and manage to sell a few cabbages and some string beans"],//TODO Can some of these be procedural?
 //        repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
@@ -185,7 +187,7 @@ export const villageActions = [
 //        itemReq: [],
 //        cost: {},
 //        effect: { rest: 0 },
-//        rewards: { wood: 5 },
+//        rewards: { Wood: 5 },
 //        message: "You sleep and dream of gold and glory",
 //        messages: ["You sleep and dream of gold and glory"],
 //        repeats: -1 /* number of times an action can be repeated. -1 for inifinite*/
