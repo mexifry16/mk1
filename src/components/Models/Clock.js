@@ -62,7 +62,12 @@ export default class Clock {
         switch (true) {
             case (newSegments >= this._segments):
                 log("complete or overflow")
-                this._completedSegments = newSegments - this._segments
+                let loopCount = 0
+                while(newSegments >= this._segments){
+                    newSegments = newSegments - this._segments
+                    loopCount++
+                }
+                log(`Looped ${loopCount} times`)
                 clockCompleted = true
                 break
             case (newSegments < this._segments && newSegments > 0):
