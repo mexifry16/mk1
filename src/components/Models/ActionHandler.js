@@ -270,7 +270,7 @@ export default class ActionHandler {
 
     //TODO: I will probably feed actions into the game via quests and events so this will likely be obsolete
     refreshActions() {
-        log("current Actions: ", this._actionList)
+        //log("current Actions: ", this._actionList)
         log("refreshing actions")
         //this.refreshAvailability()
         let newActions = []
@@ -278,7 +278,7 @@ export default class ActionHandler {
         //Get all area actions
     
         let refreshedActions = this.getActionsByLocation(this._curLocation)
-        log("location filter: ", refreshedActions)
+        //log("location filter: ", refreshedActions)
 
         //Filter by eligibility
         //refreshedActions = this.filterActionsByCharacter(this._curCharacter, refreshedActions)
@@ -286,16 +286,15 @@ export default class ActionHandler {
 
         //Compare against existing actions
         refreshedActions.forEach((mysteryAction) => {
-            log(`Searching for ${mysteryAction.name}`)
+            //log(`Searching for ${mysteryAction.name}`)
             let matchedAction = this._actionList.find((existingAction) => { return (existingAction.actionCode === mysteryAction.actionCode) })
-            log("match: ")
-            console.log(matchedAction)
+            //log("match: ")
             if (matchedAction === undefined) {
-                log(`New action ${mysteryAction.name}`)
+                //log(`New action ${mysteryAction.name}`)
                 let newAction = JSONCheatCopy(mysteryAction)
                 newAction.clock = new Clock(this.getFreshClockSettings(newAction))
-                log("new clock")
-                log("type of resolve: ", typeof (newAction.clock.resolve))
+                //log("new clock")
+                //log("type of resolve: ", typeof (newAction.clock.resolve))
                 newActions.push(newAction)
             }
         })

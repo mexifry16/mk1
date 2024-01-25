@@ -43,7 +43,7 @@ export default function ShopSidebar({ curCharacter, shopHandler, curLocation, re
 
     useEffect(() => {
         if (shopHandler.curShop != undefined) {
-            log("Shop Stock: ", Array.from(shopHandler.curShop.inventory.entries()))
+            //log("Shop Stock: ", Array.from(shopHandler.curShop.inventory.entries()))
             //log("quantities: ", Array.from(shopHandler.curShop.inventory.values()))
         }
     }, [])
