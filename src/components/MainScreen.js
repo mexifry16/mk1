@@ -228,6 +228,7 @@ export default function MainScreen({
                 width: "100%", height: "auto",
                 backgroundColor: "yellowgreen",
                 maxHeight:"15vh",
+                minHeight:"10vh",
                 overflow:"auto"
             }}>
                 <Typography variant="h6">
