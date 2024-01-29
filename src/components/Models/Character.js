@@ -203,7 +203,7 @@ export default class {
     }
 
     addItem(itemCode, quantity) {
-        log("Adding item: ", itemCode)
+        //log("Adding item: ", itemCode)
         quantity = quantity ?? 1
         //check to see if we already have it
         let item = this._inventory.get(itemCode)
@@ -251,7 +251,7 @@ export default class {
     }
 
     getHighestMod(stats) {
-        log("Stats: ", stats)
+        //log("Stats: ", stats)
         let highestStat = undefined
         let highestMod = -4
         stats.forEach((stat) => {
