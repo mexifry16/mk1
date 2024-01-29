@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite"
 import { runInAction } from "mobx"
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { Stack, Button, IconButton, Typography, Box, Divider, Paper, Tooltip, Badge, Avatar, Drawer, AppBar, Toolbar } from '@mui/material';
+import { Stack, Button, IconButton, Typography, Box, Divider, Paper, Tooltip, Badge, Avatar, Drawer, AppBar, Toolbar, Container } from '@mui/material';
 import Split from '@uiw/react-split'
 import SplitPane, { Pane } from 'split-pane-react';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Splitter, SplitterPanel } from 'primereact/splitter';
 import Sidebar from './UI/Sidebar';
+import SidebarSplitterPanel from './UI/SidebarSplitterPanel';
 import ShopSidebar from './views/ShopSidebar';
 import { ResourceDisplay } from './views/ResourceDisplay';
 import { CharacterInventory } from './views/CharacterInventory';
@@ -85,26 +87,25 @@ export default function MainScreen({
 
 
     const CharacterDetails = observer(({ actionHandler }) => {
-        let gems = []
+        let actionPointGems = []
         for (let i = 0; i < curCharacter.AP; i++) {
             if (i < curCharacter.curAP)
-                gems.push(<Avatar key={i} src={ruby} />)
+                actionPointGems.push(<Avatar key={i} src={ruby} />)
             if (i >= curCharacter.curAP)
-                gems.push(<Avatar key={i} src={spentRuby} />)
+                actionPointGems.push(<Avatar key={i} src={spentRuby} />)
         }
 
         return (
-            <Stack direction="row">
+            <Stack direction="row" backgroundColor="blue" sx={{ justifyContent: 'space-between' }}>
                 <Stack direction="column">
-                    <Typography variant="h4">
+                    <Typography variant="h5">
                         {curCharacter.name}
                     </Typography>
                     <Stack direction="row">
-                        <Typography variant="h5">
+                        <Typography variant="h6">
                             Action Points:
                         </Typography>
-                        {gems}
-
+                        {actionPointGems}
                     </Stack>
 
                 </Stack>
@@ -112,7 +113,7 @@ export default function MainScreen({
                     variant="contained"
                     color="secondary"
                     onClick={() => { rest() }}
-                    sx={{ position: "absolute", top: "20%", bottom: "20%", right: "2%", minWidth: 100 }}>
+                    sx={{ minWidth: 100 }}>
                     REST
                 </Button>
             </Stack>
@@ -158,7 +159,7 @@ export default function MainScreen({
         }
 
         return (
-            <Stack direction="row" sx={{ backgroundColor: 'orange' }}>
+            <Stack direction="row" sx={{ backgroundColor: 'orange', height:"100%" }}>
                 <Stack direction="column">
                     <Typography>
                         Actions
@@ -221,22 +222,27 @@ export default function MainScreen({
     const DisplayLog = observer(({ resourceHandler, actionHandler }) => {
         //log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         //log(actionLog)
-        return (
 
-            <Stack >
-                <Typography >
-                    Action Log
+        return (
+            <Stack sx={{
+                width: "100%", height: "auto",
+                backgroundColor: "yellowgreen",
+                maxHeight:"15vh",
+                overflow:"auto"
+            }}>
+                <Typography variant="h6">
+                    Action Log!
                 </Typography>
                 {playerLog.length > 0 ? (
                     <>
                         {playerLog.map((logItem, logIndex) => {
                             return (
-                                <Stack key={logIndex} sx={{ height: 'auto', width: '100%', backgroundColor: 'lightgray' }} >
+                                <div key={logIndex} style={{ height: 'auto', width: '100%', backgroundColor: 'lightgray' }} >
                                     <Typography>
                                         {logItem}
                                     </Typography>
                                     <Divider />
-                                </Stack>
+                                </div>
                             )
                         })}
                     </>
@@ -250,80 +256,65 @@ export default function MainScreen({
      * RENDER
      * */
     return (
-        <Split style={{ height: "80vh", border: '1px solid #d5d5d5', borderRadius: 3 }}>
+        <div style={{
+            position: "relative",
+            top: 0, right: 0, bottom: 0, left: 0,
+            border: "1px solid black",
+            display: "block",
+            // padding: 5,
+            backgroundColor: "purple",
+            height: "100%"
+            // top: 0,
+            // bottom: 0,
+            // margin: 0,
+            // minHeight: "100%"
+        }}>
+            <Splitter style={{ height: '100%', width: "100%" }} layout="horizontal">
+                {/*<Split style={{ height: "80vh", border: '1px solid #d5d5d5', borderRadius: 3 }}>*/}
+                <SidebarSplitterPanel size={10}>
+                    <Sidebar children={
+                        [
+                            <ResourceDisplay key={0} resourceHandler={resourceHandler} actionHandler={actionHandler} />,
+                            <CharacterInventory key={1} curCharacter={curCharacter} />
 
-            <div style={{ flex: 1 }}>
-                <Sidebar children={
-                    [
-                        <ResourceDisplay key={0} resourceHandler={resourceHandler} actionHandler={actionHandler} />,
-                        <CharacterInventory key={1} curCharacter={curCharacter} />
-
-                    ]
-                }>
-
-                </Sidebar>
-            </div>
-            <Split mode="vertical" style={{ width: '70%' }}>
-                <div style={{ height: '80%' }}>
-                    <AppBar position="static" color="primary" enableColorOnDark>
-                        <Toolbar>
-                            <IconButton
-                                size="large"
-                                edge="start"
-                                color="inherit"
-                                aria-label="menu"
-                                sx={{ mr: 2 }}
-                                onClick={toggleDrawer(true)}
-                            >
-                                <MenuIcon />
-                            </IconButton>
-                            <Box sx={{ m: 1, p: 1 }}>
-                                <CharacterDetails actionHandler={actionHandler} curCharacter={curCharacter} />
-
-                            </Box>
-                            <Drawer
-                                anchor="top"
-                                open={menuBarOpen}
-                                onClose={toggleDrawer(false)}
-                            >
-                                Hello World - test test test
-                            </Drawer>
-                        </Toolbar>
-                    </AppBar>
-                    <Actions
-                        resourceHandler={resourceHandler}
-                        actionHandler={actionHandler}
-                        attemptAction={attemptAction}
-                        isActionDisabled={isActionDisabled}
-                    />
-                </div>
-                <Split style={{ height: '20%' }}>
-                    <div style={{ flex: 1, overflow: 'auto' }}>
-                        <DisplayLog resourceHandler={resourceHandler} actionHandler={actionHandler} />
-                    </div>
-                </Split>
-            </Split>
-            <div style={{ flex: 1 }}>
-                <Sidebar children={
-                    [
-                        <ShopSidebarView
-                            key={0}
-                            location={curLocation}
-                            shopHandler={shopHandler}
+                        ]
+                    }>
+                    </Sidebar>
+                </SidebarSplitterPanel>
+                <SidebarSplitterPanel size={80}>
+                    <Stack direction="column" sx={{height:"100%"}}>
+                        <Box sx={{ m: "3px", p: "3px" }}>
+                            <CharacterDetails actionHandler={actionHandler} curCharacter={curCharacter} />
+                        </Box>
+                        <Actions
                             resourceHandler={resourceHandler}
                             actionHandler={actionHandler}
-                            curCharacter={curCharacter}
+                            attemptAction={attemptAction}
+                            isActionDisabled={isActionDisabled}
                         />
+                        <DisplayLog resourceHandler={resourceHandler} actionHandler={actionHandler} />
+                    </Stack>
+                </SidebarSplitterPanel>
+                <SidebarSplitterPanel size={10}>
+                    <Sidebar children={
+                        [
+                            <ShopSidebarView
+                                key={0}
+                                location={curLocation}
+                                shopHandler={shopHandler}
+                                resourceHandler={resourceHandler}
+                                actionHandler={actionHandler}
+                                curCharacter={curCharacter}
+                            />
 
-                    ]
-                }>
+                        ]
+                    }>
 
-                </Sidebar>
+                    </Sidebar>
+                </SidebarSplitterPanel>
 
-            </div>
-
-
-        </Split>
+            </Splitter>
+        </div >
     )
 
 }

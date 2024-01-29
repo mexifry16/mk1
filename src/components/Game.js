@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { observer } from "mobx-react-lite"
 import { autorun, configure } from "mobx"
-import { Stack, Button, Typography } from '@mui/material';
 import DiceBox from "@3d-dice/dice-box";
 import { readRoll } from "./Tools/Dice";
 import DisplayResults from "@3d-dice/dice-ui/src/displayResults";
@@ -136,7 +135,7 @@ export default function Game() {
 
     }
 
-    function rest(){
+    function rest() {
         curCharacter.rest()
         //move world state forward
     }
@@ -320,7 +319,7 @@ export default function Game() {
      * RENDER
      ******************************************************/
     return (
-        <>
+        <div style={{height:"100%"}}>
             <GameView
                 resourceHandler={resourceHandler}
                 actionHandler={actionHandler}
@@ -332,8 +331,7 @@ export default function Game() {
                 isActionDisabled={isActionDisabled}
                 rest={rest}
             />
-            {/*<div ref={diceBoxRef} id="dice-box"></div>*/}
-        </>
+        </div >
     )
 
 }
