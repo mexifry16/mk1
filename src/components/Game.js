@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { observer } from "mobx-react-lite"
 import { autorun, configure } from "mobx"
 import DiceBox from "@3d-dice/dice-box";
-import { readRoll } from "./Tools/Dice";
+import { readRoll, processRolls } from "./Tools/Dice";
 import DisplayResults from "@3d-dice/dice-ui/src/displayResults";
 import AdvancedRoller from "@3d-dice/dice-ui/src/advancedRoller";
 import BoxControls from "@3d-dice/dice-ui/src/boxControls";
@@ -10,9 +10,12 @@ import Character from './Models/Character';
 import ActionHandler from './Models/ActionHandler';
 import ResourceHandler from './Models/ResourceHandler';
 import ShopHandler from './Models/ShopHandler';
-import { GAMEHELPERS } from '../Helpers/GameHelpers';
+import * as GAMEHELPERS from '../Helpers/GameHelpers';
+import * as DICEHELPERS from '../Helpers/DiceHelpers'
+import {CartesianProductGenerator} from '../Helpers/MiscHelpers';
 import MainScreen from './MainScreen';
-import { RESOURCES } from '../Enums';
+import * as SETTINGS from '../GameSettings';
+import { OUTCOMES, RESOURCES } from '../Enums';
 import { Debugger, log, LOGGING_ENABLED, DEBUGGING_ENABLED } from './Debugger'
 
 /*
@@ -94,9 +97,9 @@ export default function Game() {
             highAttr = curCharacter.getHighestMod(action.statReq)
             modifiers[highAttr.attr] = highAttr.mod
             modifiers.total += highAttr.mod
-
-            let diceResults = readRoll(results, modifiers)
-            log("Dice results: ", diceResults)
+            log("raw dice results: ", results)
+            let diceResults = DICEHELPERS.processRolls(results, modifiers)
+            log("Dice results (onRollComplete): ", diceResults)
 
             let outcome = diceResults.outcome
             let position = GAMEHELPERS.determinePosition(action, curCharacter)
@@ -123,6 +126,21 @@ export default function Game() {
         //log("Outcome: ", outcome)
     }
 
+    function getNotadedDice() {
+        let numDice = SETTINGS.NUM_STARTING_DICE
+        let diceSize = SETTINGS.STARTING_DICE_SIZE
+        let extraDice = ''
+        let initialDice = `${numDice}d${diceSize}`
+        //Use this space to modify the initial dice or to check for and add extra dice (e.g. +1d4)
+        return initialDice + extraDice
+    }
+
+    function getDiceArray() {
+        let numDice = SETTINGS.NUM_STARTING_DICE
+        let diceSize = SETTINGS.STARTING_DICE_SIZE
+        // diceSize++
+        return { [diceSize]: numDice, 4:2 }
+    }
 
     /******************************************************
      * Game Logic
@@ -137,6 +155,7 @@ export default function Game() {
 
     function rest() {
         curCharacter.rest()
+        // calculateRollProbabilities()
         //move world state forward
     }
 
@@ -147,9 +166,9 @@ export default function Game() {
     function attemptAction(action) {
         actionHandler.curAction = action
         //setup dice
-        let dice = 2
-        let notatedDice = `${dice}d6`
-        rollDice(notatedDice)
+        // let dice = 2
+        // let notatedDice = `${SETTINGS.NUM_STARTING_DICE}d${SETTINGS.STARTING_DICE_SIZE}`
+        rollDice(getNotadedDice())
         //reduce AP
         curCharacter.curAP = curCharacter.curAP - action.tier
         actionHandler.refreshActions()
@@ -187,6 +206,7 @@ export default function Game() {
         //log("rewards: ", JSON.stringify(rewards))
         let multiplier = 1
         //multiplier = getMultiplier() //Maybe search the character for relevant items/perks?
+        // for (const reward of Object.entries(rewards)) {
         for (const [resource, value] of Object.entries(rewards)) {
             log(`resource:${resource}, value:${value}}`)
             let newResource = value * multiplier
@@ -220,6 +240,7 @@ export default function Game() {
     /******************************************************
      * HELPERS
      ******************************************************/
+
     function isActionDisabled(action) {
         let disabled = false
         //Check tier
@@ -319,7 +340,7 @@ export default function Game() {
      * RENDER
      ******************************************************/
     return (
-        <div style={{height:"100%"}}>
+        <div style={{ height: "100%" }}>
             <GameView
                 resourceHandler={resourceHandler}
                 actionHandler={actionHandler}

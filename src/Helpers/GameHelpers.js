@@ -18,8 +18,3 @@ export function determineEffect() {
     return EFFECTS.STANDARD
 }
 
-export const GAMEHELPERS = {
-    determinePosition: determinePosition,
-    determineEffect: determineEffect
-}
-

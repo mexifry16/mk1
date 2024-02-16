@@ -1,22 +1,27 @@
 import { useEffect, useState } from 'react';
 import { observer } from "mobx-react-lite"
 import { runInAction } from "mobx"
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { Stack, Button, IconButton, Typography, Box, Divider, Paper, Tooltip, Badge, Avatar, Drawer, AppBar, Toolbar, Container } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { Stack, Button, Typography, Box, Divider, Paper, Tooltip, Grid, Avatar, Badge, AvatarGroup } from '@mui/material';
 import Split from '@uiw/react-split'
 import SplitPane, { Pane } from 'split-pane-react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Splitter, SplitterPanel } from 'primereact/splitter';
 import Sidebar from './UI/Sidebar';
 import SidebarSplitterPanel from './UI/SidebarSplitterPanel';
+import { Scale } from '@mui/icons-material';
 import ShopSidebar from './views/ShopSidebar';
 import { ResourceDisplay } from './views/ResourceDisplay';
 import { CharacterInventory } from './views/CharacterInventory';
+import Actions from './views/ActionTable';
 import ruby from '../Assets/ruby.png';
 import spentRuby from '../Assets/spentRuby.png';
 import amythystXS from '../Assets/amythystXS.png';
 import spentAmythystXS from '../Assets/spentAmythystXS.png';
 import { log } from './Debugger';
+import { ATTRIBUTES } from '../Enums';
+import * as DICEHELPERS from '../Helpers/DiceHelpers';
+import { autorun } from "mobx"
 
 
 
@@ -33,7 +38,7 @@ export default function MainScreen({
     rest }) {
     const [menuBarOpen, setMenuBarOpen] = useState(false)
     const [currentView, setCurrentView] = useState(0)
-
+   
     const rollDice = (e) => {
         e.preventDefault();
     };
@@ -57,14 +62,7 @@ export default function MainScreen({
             curCharacter={curCharacter}
         />)
 
-    //UX State data
-    //const [actionLog, setActionLog] = useState([])
-
-    //function addActionLog(message) {
-    //    let newLog = [...actionLog]
-    //    newLog.unshift(message)
-    //    setActionLog(newLog)
-    //}
+    
 
     /**
      * View Processing
@@ -124,90 +122,7 @@ export default function MainScreen({
      * Display Components
      * */
 
-    const Actions = observer(({ resourceHandler, actionHandler, attemptAction }) => {
-
-        //function doAction(actionIndex) {
-        //    //log("Doing action (Action Display)")
-        //    let outcome = actionHandler.attemptAction(actionIndex)
-        //    log("++++++++++++++++++++++++++++++++++++++++++")
-        //    log("Results: ", outcome)
-        //    //addActionLog(result)
-
-        //}
-
-        // const checkAvailability = (action) => {
-        //     return isActionDisabled(action)
-        // }
-
-        function DisplayActionProgress({ progress }) {
-            //log("Getting progress")
-            //log("Progress: ", progress)
-            const progressDisplay = []
-            for (let gemIndex = 0; gemIndex < progress.total; gemIndex++) {
-                //log("Loop: ", gemIndex)
-                if (gemIndex < progress.completed) {
-                    //log("Adding completed gem")
-                    progressDisplay.push(<Avatar key={gemIndex} src={amythystXS} sx={{ maxWidth: 20, maxHeight: 25 }} />)
-                }
-                if (gemIndex >= progress.completed) {
-                    //log("Adding incompleted gem")
-                    progressDisplay.push(<Avatar key={gemIndex} src={spentAmythystXS} sx={{ maxWidth: 20, maxHeight: 25 }} />)
-                }
-            }
-            //log("total: ", progressDisplay.length)
-            return progressDisplay
-        }
-
-        return (
-            <Stack direction="row" sx={{ backgroundColor: 'orange', height:"100%" }}>
-                <Stack direction="column">
-                    <Typography>
-                        Actions
-                    </Typography>
-                    <Divider />
-                    {/* {availbleActions.map((action, actionIndex) => { */}
-                    {actionHandler.actions.map((action, actionIndex) => {
-                        return (
-                            <Stack direction="row" key={actionIndex} >
-                                <Tooltip
-                                    title={
-                                        <>
-                                            <Typography color="inherit">{action.name}</Typography>
-                                            <Divider />
-                                            <Typography color="inherit">{action.description}</Typography>
-                                        </>
-                                    }
-                                    placement="right-end">
-                                    <span>
-                                        <Button
-                                            disabled={isActionDisabled(action)}
-                                            variant="outlined"
-                                            onClick={() => { attemptAction(action) }}>
-                                            <Stack direction="column">
-                                                <Typography variant="h6">
-                                                    {action.name}
-                                                </Typography>
-                                                <Divider />
-                                                <Stack direction="row">
-                                                    <DisplayActionProgress progress={action.clock.progress} />
-
-                                                </Stack>
-                                                <Typography variant="subtitle">
-                                                    {action.description}
-                                                </Typography>
-                                            </Stack>
-                                        </Button>
-                                    </span>
-                                </Tooltip>
-                            </Stack>
-                        )
-                    })}
-
-                </Stack>
-
-            </Stack>
-        )
-    })
+    
 
     const EventDisplay = observer(({ resourceHandler, actionHandler }) => {
         //TODO: something that can display a column of events the player can trigger
@@ -227,9 +142,9 @@ export default function MainScreen({
             <Stack sx={{
                 width: "100%", height: "auto",
                 backgroundColor: "yellowgreen",
-                maxHeight:"15vh",
-                minHeight:"10vh",
-                overflow:"auto"
+                maxHeight: "15vh",
+                minHeight: "10vh",
+                overflow: "auto"
             }}>
                 <Typography variant="h6">
                     Action Log!
@@ -283,16 +198,47 @@ export default function MainScreen({
                     </Sidebar>
                 </SidebarSplitterPanel>
                 <SidebarSplitterPanel size={80}>
-                    <Stack direction="column" sx={{height:"100%"}}>
+                    <Stack direction="column" sx={{ height: "100%" }}>
                         <Box sx={{ m: "3px", p: "3px" }}>
                             <CharacterDetails actionHandler={actionHandler} curCharacter={curCharacter} />
                         </Box>
-                        <Actions
-                            resourceHandler={resourceHandler}
-                            actionHandler={actionHandler}
-                            attemptAction={attemptAction}
-                            isActionDisabled={isActionDisabled}
-                        />
+                        <Stack direction="row" sx={{ m: 1 }}>
+                            <Box
+                                sx={{
+                                    height: "100%",
+                                    border: "2px solid black",
+                                    backgroundColor: "pink",
+                                    borderRadius: "10px",
+                                    p: 2, mr: 2,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "space-evenly"
+                                }}>
+                                <Button variant="contained">
+                                    Actions
+                                </Button>
+                                <Button variant="contained">
+                                    Shops
+                                </Button>
+                                <Button variant="contained">
+                                    Dungeons
+                                </Button>
+                            </Box>
+                            <Box sx={{
+                                border: "2px solid black",
+                                borderRadius: "10px",
+                                justifyContent: "space-evenly"
+                            }}>
+                                <Actions
+                                    resourceHandler={resourceHandler}
+                                    actionHandler={actionHandler}
+                                    attemptAction={attemptAction}
+                                    isActionDisabled={isActionDisabled}
+                                    curCharacter={curCharacter}
+                                />
+                            </Box>
+                        </Stack>
+
                         <DisplayLog resourceHandler={resourceHandler} actionHandler={actionHandler} />
                     </Stack>
                 </SidebarSplitterPanel>

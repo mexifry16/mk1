@@ -5,12 +5,12 @@ import { JSONCheatCopy } from '../../Helpers/JSONHelpers';
 import ResourceHandler from './ResourceHandler';
 import Character from './Character';
 import Clock from './Clock';
-import { OUTCOMES, POSITIONS, EFFECTS}  from '../../Enums';
+import { OUTCOMES, POSITIONS, EFFECTS } from '../../Enums';
 import { Dice, readRoll } from '../Tools/Dice'
 import { log } from '../Debugger';
 
 export default class ActionHandler {
-   
+    _diceList = []
     constructor(args) {
         //log("Constructing Action Handler")
         //this.rootStore = rootStore
@@ -241,7 +241,7 @@ export default class ActionHandler {
         }
         this._curAction = undefined
         this.refreshActions()
-        return ({message:message, actionComplete:actionComplete})
+        return ({ message: message, actionComplete: actionComplete })
     }
 
 
@@ -253,7 +253,7 @@ export default class ActionHandler {
     // }
 
     tallyCompletedAction(actionCode) {
-        let curTally = (actionCode in this._completedActions 
+        let curTally = (actionCode in this._completedActions
             ? this._completedActions[actionCode] : 0)
         //let curTally = this._completedActions.get(actionCode)
         this._completedActions[actionCode] = curTally + 1
@@ -276,7 +276,7 @@ export default class ActionHandler {
         let newActions = []
 
         //Get all area actions
-    
+
         let refreshedActions = this.getActionsByLocation(this._curLocation)
         //log("location filter: ", refreshedActions)
 
@@ -327,7 +327,7 @@ export default class ActionHandler {
         //     log(`(${character.curAP}/${action.tierReq})Not enough AP to do ${action.name}`)
         //     available = false
         // }
-        
+
 
         //Check resources
         // if (available && action.resourceReq.length > 0) {

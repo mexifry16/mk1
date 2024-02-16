@@ -42,12 +42,12 @@ export default class {
         this._equipped = new Map([["head", null], ["chest", null], ["weapon", null]])
         this._fate = 0
         this._STR = 18
-        this._DEX = 18
-        this._CON = 18
-        this._INT = 18
+        this._DEX = 16
+        this._CON = 14
+        this._INT = 12
         this._WIS = 18
-        this._CHA = 18
-        this._LCK = 18
+        this._CHA = 8
+        this._LCK = 6
         this.class = 'Peasant'
 
         //TODO SHOULD BE keyExistsAndHasValue()
@@ -220,7 +220,7 @@ export default class {
             item.quantity = 1
             this._inventory.set(itemCode, item)
         }
-}
+    }
 
     removeItem(itemCode, quantity) {
         let selectedItem = this._inventory.get(itemCode)
@@ -251,7 +251,7 @@ export default class {
     }
 
     getHighestMod(stats) {
-        //log("Stats: ", stats)
+        // console.log("Stats for highest mod: ", stats)
         let highestStat = undefined
         let highestMod = -4
         stats.forEach((stat) => {
@@ -267,63 +267,75 @@ export default class {
 
     getAttrModifier(stat) {
         let attribute = undefined
-        switch (stat) {
-            case ATTRIBUTES.STRENGTH:
-                attribute = this.STR
-                break
-            case ATTRIBUTES.DEXTERITY:
-                attribute = this.DEX
-                break
-            case ATTRIBUTES.CONSTITUTION:
-                attribute = this.CON
-                break
-            case ATTRIBUTES.WIDSOM:
-                attribute = this.WIS
-                break
-            case ATTRIBUTES.INTELLIGENCE:
-                attribute = this.INT
-                break
-            case ATTRIBUTES.CHARISMA:
-                attribute = this.CHA
-                break
-            case ATTRIBUTES.LUCK:
-                attribute = this.LCK
-                break
-            default:
-                log("Undefined attribute when getting modifier")
-                attribute = undefined
+        if (stat) {
+            // log("Stat(Attr) :", stat)
+            switch (stat) {
+                case ATTRIBUTES.STRENGTH:
+                    attribute = this.STR
+                    break
+                case ATTRIBUTES.DEXTERITY:
+                    attribute = this.DEX
+                    break
+                case ATTRIBUTES.CONSTITUTION:
+                    attribute = this.CON
+                    break
+                case ATTRIBUTES.WISDOM:
+                    attribute = this.WIS
+                    break
+                case ATTRIBUTES.INTELLIGENCE:
+                    attribute = this.INT
+                    break
+                case ATTRIBUTES.CHARISMA:
+                    attribute = this.CHA
+                    break
+                case ATTRIBUTES.LUCK:
+                    attribute = this.LCK
+                    break
+                default:
+                    console.log(`Undefined attribute when getting modifier:${stat}`)
+                    attribute = undefined
+            }
+            // log("Attr found: ", attribute)
         }
-
         return this.getModifier(attribute)
     }
 
     getModifier(stat) {
         let modifier = 0
-        switch (true) {
-            case stat >= 18:
-                modifier = 3
-                break
-            case stat >= 16 && stat < 18:
-                modifier = 2
-                break
-            case stat >= 13 && stat < 15:
-                modifier = 1
-                break
-            case stat >= 9 && stat < 13:
-                modifier = 0
-                break
-            case stat >= 6 && stat < 9:
-                modifier = -1
-                break
-            case stat >= 4 && stat < 6:
-                modifier = -2
-                break
-            case stat >= 1 && stat < 4:
-                modifier = -3
-                break
-            default:
-                log("Stat less than 1 when getting modifier")
-                modifier = 0
+        if (stat) {
+            modifier = stat - 10
+            if (modifier != 0)
+                modifier = modifier / 2
+
+            modifier = Math.ceil(modifier)
+            // log(`Stat:${stat}, modifier: ${modifier}`)
+
+            // switch (true) {
+            //     case stat >= 18:
+            //         modifier = 3
+            //         break
+            //     case stat >= 16 && stat < 18:
+            //         modifier = 2
+            //         break
+            //     case stat >= 13 && stat < 15:
+            //         modifier = 1
+            //         break
+            //     case stat >= 9 && stat < 13:
+            //         modifier = 0
+            //         break
+            //     case stat >= 6 && stat < 9:
+            //         modifier = -1
+            //         break
+            //     case stat >= 4 && stat < 6:
+            //         modifier = -2
+            //         break
+            //     case stat >= 1 && stat < 4:
+            //         modifier = -3
+            //         break
+            //     default:
+            //         log("Stat less than 1 when getting modifier")
+            //         modifier = 0
+            // }
         }
         return modifier
     }
