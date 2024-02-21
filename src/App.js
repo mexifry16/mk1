@@ -51,9 +51,9 @@ export default function App() {
             parent route elements. See the note about <Outlet> below. */}
                     {/* <Route path="/" element={<Layout />}> */}
                     <Routes>
-                        <Route path="/about" element={<About />} />
-                        <Route path="/experiments" element={<Game />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/mk1/about" element={<About />} />
+                        <Route path="/mk1/dashboard" element={<Dashboard />} />
+                        <Route path="/mk1" element={<Game />} />
                         <Route path="*" element={<NoMatch />} />
                         {/* Using path="*"" means "match anything", so this route
                     acts like a catch-all for URLs that we don't have explicit
@@ -68,11 +68,9 @@ export default function App() {
                     backgroundColor: "white",
                     alignItems:"center"
                 }}>
-                    <Link to="/">Home</Link>
-                    <Link to="/dashboard">Dashboard</Link>
-                    <Link to="/experiments">Experiments</Link>
-                    <Link to="/about">About</Link>
-                    <Link to="/nothing-here">Nothing Here</Link>
+                    <Link to="/mk1">Game Prototype</Link>
+                    <Link to="/mk1/dashboard">Dashboard</Link>
+                    <Link to="/mk1/about">About</Link>
                 </Stack>
             </div >
         </>
